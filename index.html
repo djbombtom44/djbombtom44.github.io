@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <style>
@@ -8,7 +8,6 @@
   border: 1px solid #ccc; /* Optional: adds a border so you can see the container */
   padding-bottom: 30px; /* Adds space for the footer at the bottom */
 }
-
 
 .caption-footer {
   position: absolute;
@@ -22,7 +21,6 @@
   background-color: #f9f9f9; /* Optional: gives the footer a background color */
 }
 </style>
-
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
@@ -39,25 +37,21 @@
                 return false;
             });
 
-
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
                 if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
                 if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
             });
 
-
             document.body.style.userSelect = 'none';
             document.body.style.webkitUserSelect = 'none';
         });
-
 
         window.onerror = function (msg, url, lineNo, columnNo, error) {
             console.error('Error: ' + msg + '\nLine: ' + lineNo);
             return false;
         };
     </script>
-
 
     <style>
         body { 
@@ -73,20 +67,17 @@
             z-index: 50; display: none;
         }
 
-
         #hurt-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, transparent 50%, rgba(255,0,0,0.6) 100%);
             opacity: 0; pointer-events: none; transition: opacity 0.1s; z-index: 9;
         }
 
-
         #water-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 100, 200, 0.3);
             opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 8;
         }
-
 
         #penalty-banner {
             position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
@@ -96,13 +87,11 @@
             pointer-events: none; font-size: 14px;
         }
 
-
         .top-bar {
             background: rgba(0,0,0,0.7); color: white; padding: 8px 12px;
             display: flex; justify-content: space-between; align-items: center;
             backdrop-filter: blur(5px); pointer-events: auto;
         }
-
 
         .mode-badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -115,14 +104,12 @@
         .mode-offline { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 0 10px rgba(0,242,254,0.5); }
         .mode-3d { background: linear-gradient(135deg, #ff9a00 0%, #ff6a00 100%); box-shadow: 0 0 10px rgba(255,154,0,0.5); }
 
-
         .btn-menu {
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white;
             padding: 4px 10px; cursor: pointer; font-weight: bold; border-radius: 4px;
             backdrop-filter: blur(10px); transition: all 0.2s; font-size: 11px;
         }
         .btn-menu:hover { background: rgba(255,255,255,0.2); }
-
 
         #stats-container {
             position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
@@ -144,7 +131,6 @@
             line-height: 14px; z-index: 2;
         }
 
-
         #equipment-display {
             position: absolute; bottom: 15px; left: 15px;
             display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
@@ -164,7 +150,6 @@
             background: linear-gradient(135deg, rgba(0, 200, 0, 0.8), rgba(0, 100, 0, 0.8));
             box-shadow: 0 0 15px #00ff00; 
         }
-
 
         /* INVENTORY UI */
         #inventory-ui {
@@ -186,7 +171,6 @@
             background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 3px;
             font-weight: bold; min-width: 30px; text-align: center;
         }
-
 
         #chest-modal {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -222,7 +206,6 @@
             border-radius: 50%; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
             transform: translate(-50%, -50%); pointer-events: none; opacity: 0.6; z-index: 5;
@@ -230,7 +213,6 @@
         #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; box-shadow: 0 0 3px black; }
         #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
         #crosshair::after { top: 0; left: 9px; width: 2px; height: 20px; }
-
 
         /* MODE SELECTION SCREEN */
         #mode-selection {
@@ -284,7 +266,6 @@
         
         .mode-icon { font-size: 64px; }
 
-
         /* DIMENSION SELECTION */
         #dimension-selection {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -328,7 +309,6 @@
             transform: translateX(5px);
         }
 
-
         #menu-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
@@ -354,7 +334,6 @@
         
         h2 { color: #ffffff; margin-top: 0; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
 
-
         .input-group { margin: 15px 0; text-align: left; }
         label { display: block; color: #ddd; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
         input[type="text"], input[type="number"], input[type="password"], select {
@@ -364,7 +343,6 @@
         input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus { 
             border-color: rgba(255,255,255,0.6); outline: none; 
         }
-
 
         .btn-row { display: flex; gap: 10px; margin-top: 15px; }
         
@@ -376,7 +354,6 @@
         button:active { transform: scale(0.95); }
         button:disabled { background: #555; color: #888; cursor: not-allowed; transform: none; }
 
-
         .btn-host { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
         .btn-join { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; }
         .btn-copy { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); margin-top: 10px; }
@@ -386,10 +363,8 @@
         
         .btn-close-mobile { display: none; background: #ff4444; color: white; margin-top: 15px; }
 
-
         .checkbox-row { text-align: left; margin-top: 12px; display: flex; align-items: center; gap: 8px; color: #ddd; font-size: 13px; }
         input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-
 
         #host-id-display {
             background: rgba(0,0,0,0.5); padding: 12px; border-radius: 6px; margin: 15px 0;
@@ -403,7 +378,6 @@
             border: 1px solid rgba(255,255,255,0.2);
         }
         .plist-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 3px 0; }
-
 
         #host-section, #join-section { display: none; }
         #main-menu-btns { display: block; }
@@ -420,7 +394,6 @@
         .server-item:hover { background: rgba(255,255,255,0.1); }
         .server-lock { color: #ffaa00; font-size: 11px; }
 
-
         #host-info-panel {
             display: none; align-items: center; gap: 8px; 
             background: rgba(255,255,255,0.1); padding: 4px 10px; 
@@ -436,14 +409,12 @@
             font-size: 9px; text-transform: uppercase; width: auto;
         }
 
-
         #toolbar {
             pointer-events: auto; background: rgba(0,0,0,0.8); padding: 8px;
             display: flex; gap: 4px; justify-content: center; opacity: 0; transition: opacity 0.2s;
             border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap; max-width: 90%;
         }
         #toolbar.visible { opacity: 1; }
-
 
         .block-btn {
             width: 40px; height: 40px; border: 2px solid white; cursor: pointer; border-radius: 4px;
@@ -453,7 +424,6 @@
         }
         .block-btn:hover { transform: scale(1.1); }
         .block-btn.active { border-color: yellow; transform: scale(1.2); box-shadow: 0 0 10px rgba(255,255,0,0.5); }
-
 
         #chat-container {
             position: absolute; top: 55px; left: 8px;
@@ -478,7 +448,6 @@
         .chat-name { font-weight: bold; color: #87CEEB; }
         .chat-system { color: #f0f0f0; font-style: italic; }
 
-
         #toast {
             position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.9); color: white; padding: 8px 16px;
@@ -486,7 +455,6 @@
             opacity: 0; transition: opacity 0.3s; z-index: 100; border: 1px solid rgba(255,255,255,0.3);
             backdrop-filter: blur(10px);
         }
-
 
         #kick-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -497,7 +465,6 @@
         #kick-screen button { width: auto; padding: 10px 30px; font-size: 20px; }
         #kick-screen .reason { font-size: 18px; margin-bottom: 20px; color: white; }
 
-
         #mobile-controls {
             display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 15;
@@ -505,7 +472,6 @@
         
         .touch-zone-left { position: absolute; bottom: 0; left: 0; width: 40%; height: 50%; pointer-events: auto; }
         .touch-zone-right { position: absolute; bottom: 0; right: 0; width: 60%; height: 50%; pointer-events: auto; }
-
 
         .joystick-base {
             position: absolute; width: 100px; height: 100px;
@@ -519,7 +485,6 @@
             transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
-
         .mob-btn {
             position: absolute; width: 55px; height: 55px;
             background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.4);
@@ -531,7 +496,6 @@
         }
         .mob-btn:active { background: rgba(102, 126, 234, 0.8); transform: scale(0.9); }
         .mob-btn.active { background: rgba(245, 87, 108, 0.9); border-color: #f5576c; }
-
 
         #btn-jump { bottom: 35px; right: 15px; width: 65px; height: 65px; background: rgba(0,150,0,0.6); }
         #btn-shift { bottom: 35px; right: 90px; font-size: 9px; }
@@ -547,7 +511,6 @@
             font-size: 9px;
         }
         #btn-shield.active { background: rgba(255,215,0,0.9); }
-
 
         @media (max-width: 800px) {
             #chat-container { width: 200px; height: 110px; font-size: 11px; top: 48px; left: 6px; }
@@ -591,10 +554,8 @@
 </head>
 <body>
 
-
     <div id="hurt-overlay"></div>
     <div id="water-overlay"></div>
-
 
     <div id="penalty-banner">
         SERVER RECOVERY MODE<br>
@@ -602,14 +563,12 @@
         Time remaining: <span id="penalty-timer">5:00</span>
     </div>
 
-
     <!-- MODE SELECTION SCREEN -->
     <div id="mode-selection">
         <div class="mode-selection-title"> 🔥SERVERWORLD🔥 </div>
 <footer class="caption-footer">
    ©Midkid808 2026
   </footer>
-
 
         <div class="mode-buttons">
             <div class="mode-button mode-online" onclick="selectMode('online')">
@@ -626,7 +585,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- DIMENSION SELECTION SCREEN -->
     <div id="dimension-selection">
@@ -646,14 +604,12 @@
     Not ready (Working hard to get it done!)
   </footer>
 
-
                     <div>3D MODE</div>
                     <div style="font-size:12px; margin-top:10px;">Layered Voxel World</div>
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- PAUSE MENU -->
     <div id="pause-menu">
@@ -665,19 +621,16 @@
         </div>
     </div>
 
-
     <div id="equipment-display">
         <div id="icon-sword" class="equip-icon" onclick="equipWeapon('sword')">⚔️ Sword</div>
         <div id="icon-bow" class="equip-icon" onclick="equipWeapon('bow')">🏹 Bow</div>
         <div id="icon-arrow" class="equip-icon">➵ 0</div>
     </div>
 
-
     <div id="inventory-ui">
         <h4>📦 INVENTORY</h4>
         <div id="inventory-list"></div>
     </div>
-
 
     <div id="kick-screen">
         <h1 id="kick-title">DISCONNECTED</h1>
@@ -685,17 +638,14 @@
         <button onclick="location.reload()">REJOIN</button>
     </div>
 
-
     <div id="canvas-container"></div>
     <div id="crosshair"></div>
     <div id="toast">ID Copied to Clipboard</div>
-
 
     <!-- Menu -->
     <div id="menu-overlay">
         <div class="menu-box">
             <div class="close-menu-x" id="menu-close-x" onclick="toggleMenu()" style="display: none;">✕</div>
-
 
             <h2>ServerWorld 0.0.3</h2>
             
@@ -704,12 +654,10 @@
                 <input type="text" id="username" placeholder="Player1" maxlength="12">
             </div>
 
-
             <div class="input-group">
                 <label>Updates Per Second (10-120)</label>
                 <input type="number" id="ups-input" value="60" min="10" max="120">
             </div>
-
 
             <div class="input-group">
                 <label>Vision Distance</label>
@@ -721,12 +669,10 @@
                 </select>
             </div>
 
-
             <div class="checkbox-row">
                 <input type="checkbox" id="chk-show-chat" checked onchange="toggleChatVisibility()">
                 <span>Show Chat</span>
             </div>
-
 
             <div class="checkbox-row">
                 <input type="checkbox" id="chk-textures" checked onchange="toggleTextures()">
@@ -738,9 +684,7 @@
                 <span>Show Movement Joystick</span>
             </div>
 
-
             <button id="btn-view-toggle" class="btn-secondary" onclick="toggleViewMode()" style="margin-bottom: 15px;">View: Third Person</button>
-
 
             <div id="main-menu-btns">
                 <button class="btn-host" onclick="showHostSection()">HOST GAME</button>
@@ -752,7 +696,6 @@
                     <button class="btn-secondary" onclick="loadOfflineWorld()">LOAD WORLD</button>
                 </div>
             </div>
-
 
             <!-- Host Section -->
             <div id="host-section">
@@ -769,12 +712,10 @@
                     <span>Private Server (Hidden from list)</span>
                 </div>
 
-
                 <div id="host-id-display">Generating ID...</div>
                 
                 <div style="text-align: left; color:#ddd; margin-top:10px; font-size:11px;">Connected Players:</div>
                 <div id="host-player-list">No other players</div>
-
 
                 <div class="checkbox-row">
                     <input type="checkbox" id="chk-allow-studio" checked onchange="toggleStudioPermission()">
@@ -791,13 +732,11 @@
                 <button class="btn-secondary" id="btn-back-host" onclick="resetMenu()">BACK</button>
             </div>
 
-
             <div id="join-section">
                 <div id="server-browser-list">
                     <div style="padding:10px; color:#ddd; text-align:center;">Searching for servers...</div>
                 </div>
                 <div style="text-align:center; color:#aaa; font-size:9px; margin-bottom:10px;">If it doesn’t work then I might have stopped the github websocket server or there is a browser error… Sorry either way 🫠</div>
-
 
                 <div class="input-group">
                     <label>Direct Connect (ID)</label>
@@ -807,7 +746,6 @@
                 <button class="btn-secondary" onclick="resetMenu()">BACK</button>
             </div>
 
-
             <button class="btn-secondary btn-close-mobile" id="menu-close-mobile" onclick="toggleMenu()" style="display: none;">CLOSE MENU</button>
             
             <div id="loading-msg" style="display:none; color: #ffffff; margin-top:15px; font-weight:bold;">
@@ -816,11 +754,9 @@
         </div>
     </div>
 
-
     <!-- In-Game UI -->
     <div id="ui-layer">
         <div id="indicators-container"></div>
-
 
         <div class="top-bar">
             <div style="display:flex; align-items:center;">
@@ -836,7 +772,6 @@
                 <button class="btn-menu" onclick="openPauseMenu()">MENU</button>
             </div>
         </div>
-
 
         <div id="stats-container">
             <div class="bar-wrap" id="bar-oxygen-wrap" style="display:none;">
@@ -863,12 +798,10 @@
             <div id="chest-items" class="chest-grid"></div>
         </div>
 
-
         <div id="chat-container">
             <div id="chat-messages"></div>
             <input type="text" id="chat-input" placeholder="Tap to chat or use /cmd..." maxlength="50">
         </div>
-
 
         <div style="display:flex; flex-direction:row; align-items:flex-end; width:100%; height: 100%; padding-bottom: 15px; box-sizing: border-box; pointer-events: none;">
             <div style="flex:1; display:flex; justify-content:center; pointer-events: none;">
@@ -876,7 +809,6 @@
             </div>
         </div>
     </div>
-
 
     <div id="mobile-controls">
         <div class="touch-zone-left" id="zone-move"></div>
@@ -892,7 +824,6 @@
         <div class="mob-btn" id="btn-studio-toggle" style="pointer-events: auto;">STUDIO</div>
     </div>
 
-
     <script>
         // --- GLOBAL GAME MODE & DIMENSION ---
         let gameMode = null; // 'online' or 'offline'
@@ -900,7 +831,6 @@
         let offlineWorldData = null;
         let showJoystick = false;
         let texturesEnabled = true;
-
 
         // --- BLOCK TYPES (Minecraft-style) ---
         const BLOCK_TYPES = {
@@ -915,22 +845,18 @@
             WATER: { id: 8, name: 'Water', color: '#1E90FF', texture: null, transparent: true },
         };
 
-
         const BLOCK_ID_TO_TYPE = {};
         Object.keys(BLOCK_TYPES).forEach(key => {
             BLOCK_ID_TO_TYPE[BLOCK_TYPES[key].id] = BLOCK_TYPES[key];
         });
 
-
         let selectedBlockType = BLOCK_TYPES.STONE;
-
 
         function selectMode(mode) {
             gameMode = mode;
             document.getElementById('mode-selection').classList.add('hidden');
             document.getElementById('dimension-selection').style.display = 'flex';
         }
-
 
         function selectDimension(dimension) {
             gameDimension = dimension;
@@ -958,7 +884,6 @@
                 initServerBrowser();
             }
 
-
             if (gameDimension === '3d') {
                 badge.classList.add('mode-3d');
                 badge.innerText += ' (3D)';
@@ -969,7 +894,6 @@
             }
         }
 
-
         function startOfflineGame() {
             isMenuOpen = false;
             document.getElementById('menu-overlay').classList.add('hidden');
@@ -979,7 +903,6 @@
             startGame();
             showToast("Offline Game Started");
         }
-
 
         function saveOfflineWorld() {
             const worldData = {
@@ -1006,7 +929,6 @@
             showToast("World Saved!");
         }
 
-
         function loadOfflineWorld() {
             const savedData = localStorage.getItem('serverworld_offline_save');
             if (!savedData) {
@@ -1026,7 +948,6 @@
                 showToast("Failed to load world");
             }
         }
-
 
         function applyOfflineWorldData(data) {
             worldBlocks.forEach(mesh => {
@@ -1060,11 +981,9 @@
             updateInventoryUI();
         }
 
-
         function toggleJoystickVisibility() {
             showJoystick = document.getElementById('chk-show-joystick').checked;
         }
-
 
         function toggleTextures() {
             texturesEnabled = document.getElementById('chk-textures').checked;
@@ -1077,17 +996,14 @@
             showToast(texturesEnabled ? "Textures Enabled" : "Textures Disabled");
         }
 
-
 // --- SERVER BROWSER LOGIC ---
 let wsClient = null;
 let serverBrowserMap = new Map();
 let serverPassword = "";
 let presenceInterval = null;
 
-
 // 1. YOUR ONLINE URL (From GitHub Codespaces)
 const ONLINE_URL = 'wss://super-duper-space-waffle-5g7pgqj9569jcp4wj-8080.app.github.dev'; 
-
 
 // 2. AUTO-SWITCHER
 // If testing on your computer, use localhost:8080.
@@ -1100,7 +1016,6 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
     WS_URL = ONLINE_URL;
     console.log("Using Online Server:", WS_URL);
 }
-
 
 // Helper to prevent hacking (XSS) via server names
 function escapeHTML(str) {
@@ -1115,7 +1030,6 @@ function escapeHTML(str) {
         }[tag]));
 }
 
-
 function initServerBrowser() {
     // dependency: gameMode must be defined globally
     if (typeof gameMode !== 'undefined' && gameMode === 'offline') return; 
@@ -1126,7 +1040,6 @@ function initServerBrowser() {
     console.log("Connecting to Lobby:", WS_URL);
     wsClient = new WebSocket(WS_URL);
 
-
     wsClient.onopen = () => {
         console.log("Connected to Custom Game Lobby");
         // Only start broadcasting if we are the host
@@ -1134,7 +1047,6 @@ function initServerBrowser() {
             presenceInterval = setInterval(publishPresence, 3000);
         }
     };
-
 
     wsClient.onmessage = (event) => {
         try {
@@ -1159,7 +1071,6 @@ function initServerBrowser() {
     };
 }
 
-
 function publishPresence() {
     // dependency: check global variables exist before running
     if (typeof gameMode === 'undefined' || gameMode === 'offline' || 
@@ -1175,7 +1086,6 @@ function publishPresence() {
     
     if (isPrivate) return;
 
-
     const packet = {
         op: 'presence',
         id: myPeerId,
@@ -1188,17 +1098,14 @@ function publishPresence() {
     wsClient.send(JSON.stringify(packet));
 }
 
-
 function updateBrowserUI() {
     if (typeof gameMode !== 'undefined' && gameMode === 'offline') return;
     const list = document.getElementById('server-browser-list');
     if (!list) return;
 
-
     const now = Date.now();
     let html = '';
     let count = 0;
-
 
     serverBrowserMap.forEach((val, id) => {
         // Remove servers that haven't pinged in 10 seconds
@@ -1222,10 +1129,8 @@ function updateBrowserUI() {
                  </div>`;
     });
 
-
     list.innerHTML = count === 0 ? '<div style="padding:20px; color:#888; text-align:center;">No games found...</div>' : html;
 }
-
 
 function connectToServer(id, locked) {
     let pass = '';
@@ -1239,9 +1144,6 @@ function connectToServer(id, locked) {
     // dependency: joinGame must be defined globally
     if (typeof joinGame === 'function') joinGame(pass);
 }
-
-
-
 
 
 
@@ -1284,7 +1186,6 @@ function connectToServer(id, locked) {
         let isHost = false;
         let myName = "Player" + Math.floor(Math.random()*999);
 
-
         const worldBlocks = new Map();
         const otherPlayers = new Map();
         const chestData = {};
@@ -1315,7 +1216,6 @@ function connectToServer(id, locked) {
         let mutedPlayers = new Set();
         let isServerMuted = false;
 
-
         let scene, camera, renderer, raycaster, mouse;
         let camYaw = 0, camPitch = 0;
         const CAM_SENSITIVITY = 0.002;
@@ -1339,7 +1239,6 @@ function connectToServer(id, locked) {
             maxOxygen: 100
         };
 
-
         const HEALTH_REGEN_RATE_PER_SEC = 5;
         const HEALTH_REGEN_DELAY_MS = 4500;
         let lastHitTime = 0;
@@ -1347,9 +1246,7 @@ function connectToServer(id, locked) {
         
         const keys = { w:false, a:false, s:false, d:false, space:false, shift:false, ctrl:false, click:false, shieldBtn:false };
 
-
         function resetIdleTimer() { lastInteractionTime = Date.now(); }
-
 
         function kickPlayer(reason = "KICKED FOR IDLE") {
             if (peer) peer.destroy();
@@ -1361,7 +1258,6 @@ function connectToServer(id, locked) {
             cancelAnimationFrame(animate);
             if(gameLoopInterval) clearInterval(gameLoopInterval);
         }
-
 
         function getDisconnectMessage(reason) {
             const messages = {
@@ -1376,7 +1272,6 @@ function connectToServer(id, locked) {
             return messages[reason] || "Disconnected from server";
         }
 
-
         function resetMenu() {
             document.getElementById('host-section').style.display = 'none';
             document.getElementById('join-section').style.display = 'none';
@@ -1389,7 +1284,6 @@ function connectToServer(id, locked) {
             if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
         }
 
-
         function toggleViewMode() {
             viewMode = (viewMode + 1) % 3;
             const btn = document.getElementById('btn-view-toggle');
@@ -1397,7 +1291,6 @@ function connectToServer(id, locked) {
             else if (viewMode === 1) btn.innerText = "View: Third Person";
             else btn.innerText = "View: Second Person";
         }
-
 
         function updateViewDistance() {
             const sel = document.getElementById('vision-dist-select');
@@ -1410,7 +1303,6 @@ function connectToServer(id, locked) {
             }
             updateTerrainChunks();
         }
-
 
         function showHostSection() {
             if (gameMode === 'offline') return;
@@ -1427,7 +1319,6 @@ function connectToServer(id, locked) {
             updateHostPlayerList();
             if(!peer) initPeer(true);
         }
-
 
         function showJoinSection() {
             if (gameMode === 'offline') return;
@@ -1496,17 +1387,14 @@ function connectToServer(id, locked) {
                 isHost = false;
             }
 
-
             if(gameLoopInterval) clearInterval(gameLoopInterval);
             if(presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
-
 
             document.getElementById('ui-layer').style.display = 'none';
             document.getElementById('host-info-panel').style.display = 'none';
             document.getElementById('menu-overlay').classList.remove('hidden');
             document.getElementById('penalty-banner').style.display = 'none';
             isMenuOpen = true;
-
 
             if (playerMesh) { scene.remove(playerMesh); playerMesh = null; }
             
@@ -1535,17 +1423,14 @@ function connectToServer(id, locked) {
             projectiles.forEach(p => scene.remove(p.mesh));
             projectiles.length = 0;
 
-
             activeChunks.forEach(mesh => {
                 scene.remove(mesh);
                 mesh.geometry.dispose();
             });
             activeChunks.clear();
 
-
             if(scene) scene.background = new THREE.Color(0x000000);
             document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-
 
             player.health = player.maxHealth;
             player.armor = 0;
@@ -1568,7 +1453,6 @@ function connectToServer(id, locked) {
             showToast("You left");
         }
 
-
         function closeServer() {
             if (!isHost) return leaveGame();
             broadcast({ type: 'chat', msg: 'Host closed the server.' }, null, true);
@@ -1578,7 +1462,6 @@ function connectToServer(id, locked) {
             showToast("Server closed.");
         }
 
-
         function toggleStudioPermission() {
             if(!isHost) return;
             studioAllowed = document.getElementById('chk-allow-studio').checked;
@@ -1587,14 +1470,12 @@ function connectToServer(id, locked) {
             showToast(studioAllowed ? "Studio Mode Enabled" : "Studio Mode Disabled");
         }
 
-
         function togglePvPPermission() {
             if(!isHost) return;
             pvpAllowed = document.getElementById('chk-allow-pvp').checked;
             sendPacket({ type: 'config', studioAllowed: studioAllowed, pvpAllowed: pvpAllowed });
             showToast(pvpAllowed ? "PvP Enabled" : "PvP Disabled");
         }
-
 
         // --- PAUSE MENU ---
         function openPauseMenu() {
@@ -1624,13 +1505,11 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function closePauseMenu() {
             isPaused = false;
             document.getElementById('pause-menu').style.display = 'none';
             if (!isMobile && !isChestOpen) renderer.domElement.requestPointerLock();
         }
-
 
         function addPauseButton(text, onClick) {
             const btn = document.createElement('div');
@@ -1639,7 +1518,6 @@ function connectToServer(id, locked) {
             btn.onclick = onClick;
             document.getElementById('pause-menu-buttons').appendChild(btn);
         }
-
 
         function showPlayerList() {
             let list = '<div style="color:white;padding:20px;"><h3>Connected Players</h3>';
@@ -1654,7 +1532,6 @@ function connectToServer(id, locked) {
             container.innerHTML = list;
             addPauseButton('Back', openPauseMenu);
         }
-
 
         function showHostCommands() {
             const cmds = `
@@ -1675,7 +1552,6 @@ function connectToServer(id, locked) {
             addPauseButton('Back', openPauseMenu);
         }
 
-
         function showClientCommands() {
             const cmds = `
                 <div style="color:white;padding:20px;text-align:left;font-size:11px;">
@@ -1687,7 +1563,6 @@ function connectToServer(id, locked) {
             document.getElementById('pause-menu-buttons').innerHTML = cmds;
             addPauseButton('Back', openPauseMenu);
         }
-
 
         function showHostOptions() {
             const opts = `
@@ -1707,7 +1582,6 @@ function connectToServer(id, locked) {
             addPauseButton('Back', openPauseMenu);
         }
 
-
         function showClientOptions() {
             const opts = `
                 <div style="color:white;padding:20px;">
@@ -1726,7 +1600,6 @@ function connectToServer(id, locked) {
             addPauseButton('Back', openPauseMenu);
         }
 
-
         function showOfflineOptions() {
             const opts = `
                 <div style="color:white;padding:20px;">
@@ -1738,13 +1611,11 @@ function connectToServer(id, locked) {
             addPauseButton('Back', openPauseMenu);
         }
 
-
         function saveAndExit() {
             saveOfflineWorld();
             leaveGame();
             closePauseMenu();
         }
-
 
         // --- NETWORKING ---
         function initPeer(asHost) {
@@ -1760,7 +1631,6 @@ function connectToServer(id, locked) {
                 }
             });
 
-
             peer.on('connection', (conn) => {
                 if(isHost) {
                     const pass = conn.metadata ? conn.metadata.password : '';
@@ -1771,7 +1641,6 @@ function connectToServer(id, locked) {
                         });
                         return;
                     }
-
 
                     clientConnections.push(conn);
                     setupConnection(conn);
@@ -1799,7 +1668,6 @@ function connectToServer(id, locked) {
             peer.on('error', (err) => { console.error(err); showToast("Connection Error"); });
         }
 
-
         function startHostGame() {
             if (gameMode === 'offline') return;
             
@@ -1814,7 +1682,6 @@ function connectToServer(id, locked) {
             if(ups < 10) ups = 10; if(ups > 120) ups = 120;
             gameUPS = ups;
 
-
             document.getElementById('main-menu-btns').style.display = 'none';
             document.getElementById('btn-start-playing').style.display = 'none';
             document.getElementById('btn-back-host').style.display = 'none';
@@ -1828,15 +1695,12 @@ function connectToServer(id, locked) {
             updateCloseButtons();
             nextMobSpawn = Date.now() + MOB_SPAWN_INTERVAL;
 
-
             publishPresence();
             presenceInterval = setInterval(publishPresence, 4000);
-
 
             startGame();
             if(!isMobile) renderer.domElement.requestPointerLock();
         }
-
 
         function joinGame(password = '') {
             if (gameMode === 'offline') return;
@@ -1875,7 +1739,6 @@ function connectToServer(id, locked) {
                 kickPlayer("Host disconnected"); 
             });
         }
-
 
         function setupConnection(conn) {
             conn.on('data', (data) => {
@@ -1942,7 +1805,6 @@ function connectToServer(id, locked) {
             });
         }
 
-
         function activateServerPenalty(isClientRecv = false) {
             if(!isClientRecv) serverPenaltyEnd = Date.now() + PENALTY_DURATION;
             serverPenaltyActive = true;
@@ -1953,7 +1815,6 @@ function connectToServer(id, locked) {
             showToast("SERVER RECOVERY MODE ACTIVATED");
             updateTerrainChunks();
         }
-
 
         function checkPenaltyStatus() {
             if(!serverPenaltyActive) return;
@@ -1970,7 +1831,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function broadcast(data, excludeConn = null, isSystemMessage = false) {
             if (gameMode === 'offline') return;
             if(!isHost) return;
@@ -1979,13 +1839,11 @@ function connectToServer(id, locked) {
             if(isSystemMessage && data.msg) addChatBubble(data.name, data.msg, true);
         }
 
-
         function sendPacket(data) {
             if (gameMode === 'offline') return;
             if(isHost) broadcast(data);
             else if(hostConnection) hostConnection.send(data);
         }
-
 
         function handleMovePacket(data) {
             if(data.id === myPeerId) return;
@@ -2015,7 +1873,6 @@ function connectToServer(id, locked) {
                 p.mesh.add(createNameLabel(p.name));
             }
 
-
             p.equippedWeapon = data.weapon;
             p.isBlocking = data.blocking;
             p.health = data.hp;
@@ -2025,11 +1882,9 @@ function connectToServer(id, locked) {
                 if(bar) bar.style.width = Math.max(0, p.health) + '%';
             }
 
-
             if(data.attacking) p.attackAnim = 1.0;
             updateCharacterWeapons(p.mesh, p.equippedWeapon, p.isBlocking);
         }
-
 
         function createHUDIndicator(name) {
             const ind = document.createElement('div');
@@ -2039,11 +1894,9 @@ function connectToServer(id, locked) {
             return ind;
         }
 
-
         function handleAttackPacket(data) {
             if(data.targetId === myPeerId) takeDamage(data.weapon, data.attackerName);
         }
-
 
         function handleBlockPacket(data) {
             if(data.action === 1) createBlock(data.x, data.y, data.z, data.type);
@@ -2058,7 +1911,6 @@ function connectToServer(id, locked) {
             else if (data.reason === 'drowned') msg = `<span style="color:#00BFFF; font-weight:bold;">${data.victimName} drowned!</span>`;
             addChatBubble("SYSTEM", msg, true);
         }
-
 
         // --- MOBS ---
         function handleMobUpdate(data) {
@@ -2085,7 +1937,6 @@ function connectToServer(id, locked) {
             });
         }
 
-
         function handleMobRemove(id) {
             if(mobs.has(id)) {
                 const m = mobs.get(id);
@@ -2094,7 +1945,6 @@ function connectToServer(id, locked) {
                 mobs.delete(id);
             }
         }
-
 
         // --- COMBAT ---
         function takeDamage(weaponType, attackerName = null) {
@@ -2108,14 +1958,12 @@ function connectToServer(id, locked) {
             else if (weaponType === 'void') dmg = 100;
             else if (weaponType === 'drown') dmg = 10;
 
-
             if (player.armor > 0 && weaponType !== 'admin' && weaponType !== 'void' && weaponType !== 'drown') {
                 dmg = weaponType === 'sword' ? 20 : (weaponType === 'arrow' ? 10 : 5);
                 if(weaponType === 'creeper') dmg = 30;
                 player.armor -= 4;
                 if (player.armor <= 0) { player.armor = 0; showToast("ARMOR BROKEN!"); }
             }
-
 
             if (player.isBlocking && player.inventory.shields > 0 && weaponType !== 'admin' && weaponType !== 'void' && weaponType !== 'drown') {
                 dmg = Math.floor(dmg * 0.8);
@@ -2127,11 +1975,9 @@ function connectToServer(id, locked) {
                 }
             }
 
-
             player.health -= dmg;
             lastHitTime = Date.now();
             if (attackerName) lastKillerName = attackerName;
-
 
             updateStatsUI();
             
@@ -2153,7 +1999,6 @@ function connectToServer(id, locked) {
                 else if (weaponType === 'drown') { reason = 'drowned'; killer = 'The Ocean'; }
                 else if (lastKillerName) { reason = 'pvp'; killer = lastKillerName; }
 
-
                 if (isHost || gameMode === 'offline') {
                     const deathData = { type: 'death_message', victimName: myName, reason: reason, killerName: killer };
                     if (gameMode === 'online') {
@@ -2168,7 +2013,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function updateStatsUI() {
             const hPct = Math.max(0, (player.health / player.maxHealth) * 100);
             document.getElementById('health-fill').style.width = hPct + "%";
@@ -2178,13 +2022,11 @@ function connectToServer(id, locked) {
             document.getElementById('armor-fill').style.width = aPct + "%";
             document.getElementById('armor-text').innerText = "Armor: " + Math.ceil(player.armor);
 
-
             const sPct = Math.max(0, (player.shieldDurability / player.maxShieldDurability) * 100);
             document.getElementById('shield-fill').style.width = sPct + "%";
             document.getElementById('shield-text').innerText = "Shield: " + Math.ceil(player.shieldDurability);
             
             document.getElementById('bar-shield-wrap').style.display = (player.inventory.shields > 0) ? 'block' : 'none';
-
 
             const oPct = Math.max(0, (player.oxygen / player.maxOxygen) * 100);
             document.getElementById('oxygen-fill').style.width = oPct + "%";
@@ -2197,7 +2039,6 @@ function connectToServer(id, locked) {
             else btnShield.style.display = 'none';
         }
 
-
         function equipWeapon(type) {
             resetIdleTimer();
             if (player.equippedWeapon === type) {
@@ -2207,7 +2048,6 @@ function connectToServer(id, locked) {
             }
             updateEquipmentUI();
         }
-
 
         function updateEquipmentUI() {
             document.getElementById('icon-sword').classList.toggle('visible', player.inventory.swords > 0);
@@ -2221,18 +2061,15 @@ function connectToServer(id, locked) {
                 arrowEl.classList.add('visible'); arrowEl.innerText = `➵ ${player.inventory.arrows}`;
             } else { arrowEl.classList.remove('visible'); }
 
-
             if (fpWeapons.sword) fpWeapons.sword.visible = (player.equippedWeapon === 'sword');
             if (fpWeapons.bow) fpWeapons.bow.visible = (player.equippedWeapon === 'bow');
             
             updateStatsUI();
         }
 
-
         function updateInventoryUI() {
             const invList = document.getElementById('inventory-list');
             invList.innerHTML = '';
-
 
             // Combat items
             if (player.inventory.swords > 0) {
@@ -2248,7 +2085,6 @@ function connectToServer(id, locked) {
                 invList.innerHTML += `<div class="inv-item"><span class="inv-item-name">🛡️ Shield</span><span class="inv-item-count">${player.inventory.shields}</span></div>`;
             }
 
-
             // Block items
             Object.keys(player.blockInventory).forEach(blockId => {
                 const count = player.blockInventory[blockId];
@@ -2259,7 +2095,6 @@ function connectToServer(id, locked) {
                     }
                 }
             });
-
 
             if (invList.innerHTML === '') {
                 invList.innerHTML = '<div style="color:#888; font-size:11px; text-align:center; padding:10px;">Empty</div>';
@@ -2273,7 +2108,6 @@ function connectToServer(id, locked) {
             if(playerMesh) updateCharacterWeapons(playerMesh, player.equippedWeapon, player.isBlocking);
         }
 
-
         function updateCharacterWeapons(rig, weaponType, isBlocking) {
             if(!rig.userData) return;
             const w = rig.userData.weapons;
@@ -2284,13 +2118,11 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function checkStudioConstraint() {
             if(!studioAllowed && isStudioMode) {
                 toggleStudioMode(false); showToast("Host disabled Studio Mode");
             }
         }
-
 
         function createFloorTexture() {
             const canvas = document.createElement('canvas');
@@ -2321,7 +2153,6 @@ function connectToServer(id, locked) {
             tex.repeat.set(CHUNK_SIZE, CHUNK_SIZE);
             return tex;
         }
-
 
         function createBlockTexture(blockType) {
             const canvas = document.createElement('canvas');
@@ -2398,7 +2229,6 @@ function connectToServer(id, locked) {
             return tex;
         }
 
-
         function updateBlockAppearance(mesh, blockTypeId) {
             const blockType = BLOCK_ID_TO_TYPE[blockTypeId] || BLOCK_TYPES.STONE;
             
@@ -2431,7 +2261,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function spawnChestAt(x, y, z) {
             const key = `${x}_${y}_${z}`;
             if (chestData[key]) return;
@@ -2440,7 +2269,6 @@ function connectToServer(id, locked) {
                 { type: 'Armor', count: 3 }, { type: 'Sword', count: 3 },
                 { type: 'Arrows', count: 300 }, { type: 'Shield', count: 6 }, { type: 'Bow', count: 3 }
             ];
-
 
             // Add blocks to chest in 3D mode
             if (gameDimension === '3d') {
@@ -2475,14 +2303,12 @@ function connectToServer(id, locked) {
             });
         }
 
-
         function closeChest() {
             document.getElementById('chest-modal').style.display = 'none';
             isChestOpen = false; openChestPos = null;
             if(isMobile) document.getElementById('mobile-controls').style.display = 'block';
             if(!isMobile && !isPaused) renderer.domElement.requestPointerLock();
         }
-
 
         function lootItem(key, index, item) {
             let success = false;
@@ -2517,7 +2343,6 @@ function connectToServer(id, locked) {
                 }
             }
 
-
             if(success) {
                 updateStatsUI(); updateEquipmentUI(); updateInventoryUI();
                 if(chestData[key][index].count <= 0) chestData[key].splice(index, 1);
@@ -2525,7 +2350,6 @@ function connectToServer(id, locked) {
                 else openChest(...key.split('_').map(Number));
             }
         }
-
 
         function initEngine() {
             const container = document.getElementById('canvas-container');
@@ -2540,9 +2364,7 @@ function connectToServer(id, locked) {
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             container.appendChild(renderer.domElement);
 
-
             window.addEventListener('contextmenu', e => e.preventDefault());
-
 
             const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
             hemiLight.position.set(0, 20, 0); scene.add(hemiLight);
@@ -2558,10 +2380,8 @@ function connectToServer(id, locked) {
             dirLight.shadow.mapSize.height = 2048;
             scene.add(dirLight);
 
-
             floorTexture = createFloorTexture();
             raycaster = new THREE.Raycaster();
-
 
             // Initialize block textures
             Object.keys(BLOCK_TYPES).forEach(key => {
@@ -2570,7 +2390,6 @@ function connectToServer(id, locked) {
                     blockType.texture = createBlockTexture(blockType);
                 }
             });
-
 
             const toolbar = document.getElementById('toolbar');
             Object.keys(BLOCK_TYPES).forEach(key => {
@@ -2590,7 +2409,6 @@ function connectToServer(id, locked) {
                 }
             });
 
-
             // Add water button in 3D mode
             if (gameDimension === '3d') {
                 const waterBtn = document.createElement('div');
@@ -2605,16 +2423,13 @@ function connectToServer(id, locked) {
                 toolbar.appendChild(waterBtn);
             }
 
-
             scene.add(camera);
             const fpGeo = new THREE.BoxGeometry(0.2, 0.6, 0.2);
             const fpMat = new THREE.MeshStandardMaterial({color: myColor});
             fpArm = new THREE.Mesh(fpGeo, fpMat);
             fpArm.position.set(0.4, -0.3, -0.6); fpArm.rotation.x = 0.5; camera.add(fpArm);
 
-
             createWeaponMeshes();
-
 
             renderer.domElement.addEventListener('click', (e) => {
                 resetIdleTimer();
@@ -2634,7 +2449,6 @@ function connectToServer(id, locked) {
                 if(!isMobile) switchToMobile(); 
             });
 
-
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
             document.addEventListener('mousedown', onMouseDown);
@@ -2648,7 +2462,6 @@ function connectToServer(id, locked) {
             });
             document.getElementById('chat-input').addEventListener('keydown', (e) => e.stopPropagation());
             document.getElementById('chat-input').addEventListener('focus', () => { lastChatActivity = Date.now(); });
-
 
             const upsInput = document.getElementById('ups-input');
             upsInput.addEventListener('change', (e) => {
@@ -2665,7 +2478,6 @@ function connectToServer(id, locked) {
                 }
             });
 
-
             // Initialize block inventory for all block types
             Object.keys(BLOCK_TYPES).forEach(key => {
                 const blockType = BLOCK_TYPES[key];
@@ -2674,10 +2486,8 @@ function connectToServer(id, locked) {
                 }
             });
 
-
             updateInventoryUI();
         }
-
 
         function createWeaponMeshes() {
             const sGroup = new THREE.Group();
@@ -2722,7 +2532,6 @@ function connectToServer(id, locked) {
             );
             shGroup.add(border, plate);
 
-
             const sClone = sGroup.clone(); sClone.position.set(-0.2, 0.5, -0.2); sClone.rotation.x = Math.PI/4; sClone.visible=false;
             fpArm.add(sClone); fpWeapons.sword = sClone;
             
@@ -2735,7 +2544,6 @@ function connectToServer(id, locked) {
             scene.userData.weaponTemplates = { sword: sGroup, bow: bGroup, shield: shGroup };
         }
 
-
         function createCharacterRig(color) {
             const rig = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({color: 0xffcd05});
@@ -2743,19 +2551,15 @@ function connectToServer(id, locked) {
             const shirtMat = new THREE.MeshStandardMaterial({color: color});
             const darkMat = new THREE.MeshStandardMaterial({color: 0x111111});
 
-
             const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), skinMat);
             head.position.y = 0.7; rig.add(head);
-
 
             const eyeGeo = new THREE.BoxGeometry(0.08, 0.08, 0.05);
             const eyeL = new THREE.Mesh(eyeGeo, darkMat); eyeL.position.set(-0.1, 0.75, -0.21); rig.add(eyeL);
             const eyeR = new THREE.Mesh(eyeGeo, darkMat); eyeR.position.set(0.1, 0.75, -0.21); rig.add(eyeR);
 
-
             const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), shirtMat);
             torso.position.y = 0.1; rig.add(torso);
-
 
             function makeLimb(x, y, mat) {
                 const g = new THREE.Group(); g.position.set(x, y, 0);
@@ -2772,16 +2576,13 @@ function connectToServer(id, locked) {
             wSword.position.set(0, -0.6, 0.2); wSword.rotation.x = -Math.PI/2; wSword.visible=false;
             rArm.add(wSword);
 
-
             const wShield = scene.userData.weaponTemplates.shield.clone();
             wShield.position.set(0, -0.4, -0.2); wShield.visible=false;
             lArm.add(wShield);
 
-
             const wBow = scene.userData.weaponTemplates.bow.clone();
             wBow.position.set(0, -0.6, 0); wBow.visible=false;
             rArm.add(wBow);
-
 
             rig.add(lArm, rArm, lLeg, rLeg);
             
@@ -2791,7 +2592,6 @@ function connectToServer(id, locked) {
             };
             return rig;
         }
-
 
         function createNameLabel(text) {
             const canvas = document.createElement('canvas');
@@ -2805,11 +2605,9 @@ function connectToServer(id, locked) {
             return sprite;
         }
 
-
         function startGame() {
             scene.background = new THREE.Color(0x87CEEB);
             document.body.style.background = 'linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%)';
-
 
             playerMesh = createCharacterRig(myColor);
             scene.add(playerMesh);
@@ -2825,7 +2623,6 @@ function connectToServer(id, locked) {
             animate();
             gameLoopInterval = setInterval(gameTick, 1000 / gameUPS);
         }
-
 
         function respawnPlayer() {
             let safe = false;
@@ -2856,17 +2653,14 @@ function connectToServer(id, locked) {
                  player.y = gameDimension === '3d' ? 10 : 30;
             }
 
-
             player.vx = 0; player.vy = 0; player.vz = 0;
             player.oxygen = player.maxOxygen;
             lastKillerName = null;
         }
 
-
         function updateTerrainChunks() {
             const requiredChunks = new Set();
             const range = serverPenaltyActive ? 1 : viewDistSetting;
-
 
             const addChunksAround = (pos, r) => {
                 const cx = Math.floor(pos.x / CHUNK_SIZE);
@@ -2878,10 +2672,8 @@ function connectToServer(id, locked) {
                 }
             };
 
-
             if(playerMesh) addChunksAround(player, range);
             if(range >= 12) otherPlayers.forEach(p => addChunksAround(p.mesh.position, range));
-
 
             requiredChunks.forEach(key => {
                 if(!activeChunks.has(key)) {
@@ -2895,12 +2687,10 @@ function connectToServer(id, locked) {
                     scene.add(mesh);
                     activeChunks.set(key, mesh);
 
-
                     if(suspendedBlocks.has(key)) {
                         suspendedBlocks.get(key).forEach(b => createBlock(b.x, b.y, b.z, b.type));
                         suspendedBlocks.delete(key);
                     }
-
 
                     const rng = Math.sin(cx * 12.9898 + cz * 78.233) * 43758.5453;
                     const val = rng - Math.floor(rng);
@@ -2914,11 +2704,9 @@ function connectToServer(id, locked) {
                 }
             });
 
-
             for(const [key, mesh] of activeChunks) {
                 if(!requiredChunks.has(key)) {
                     scene.remove(mesh); mesh.geometry.dispose(); activeChunks.delete(key);
-
 
                     const [cx, cz] = key.split('_').map(Number);
                     const minX = cx * CHUNK_SIZE; const maxX = (cx + 1) * CHUNK_SIZE;
@@ -2944,7 +2732,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function shootArrow() {
             const arrow = new THREE.Group();
             const shaft = new THREE.Mesh(
@@ -2968,7 +2755,6 @@ function connectToServer(id, locked) {
             scene.add(arrow);
             projectiles.push({ mesh: arrow });
         }
-
 
         function hostMobLogic(forceSpawn = false, spawnCount = null) {
             if (gameMode === 'offline') return;
@@ -3011,7 +2797,6 @@ function connectToServer(id, locked) {
                 nextMobSpawn = now + MOB_SPAWN_INTERVAL;
             }
 
-
             if(mobsSpawned) {
                 const updates = [];
                 serverMobs.forEach(m => {
@@ -3025,7 +2810,6 @@ function connectToServer(id, locked) {
                         if(dp < minDist) { minDist = dp; target = p.target; }
                     });
 
-
                     if(target && minDist < 60) {
                         const dx = target.x - m.x; const dz = target.z - m.z;
                         const angle = Math.atan2(dx, dz);
@@ -3038,7 +2822,6 @@ function connectToServer(id, locked) {
                 if(updates.length > 0) broadcast({ type: 'mob_update', mobs: updates });
             }
         }
-
 
         function gameTick() {
             const now = Date.now();
@@ -3057,10 +2840,8 @@ function connectToServer(id, locked) {
                 }
             }
 
-
             if(isHost && gameMode === 'online') hostMobLogic();
             if(serverPenaltyActive) checkPenaltyStatus();
-
 
             const dt = 1.0 / gameUPS;
             updatePhysics(dt);
@@ -3077,15 +2858,12 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function animate() {
             requestAnimationFrame(animate);
             
             camera.updateMatrixWorld();
 
-
             if(player.inventory.shields <= 0) player.isBlocking = false;
-
 
             if(playerMesh) {
                 playerMesh.position.set(player.x, player.y, player.z);
@@ -3094,7 +2872,6 @@ function connectToServer(id, locked) {
                 animateRig(playerMesh, moveSpeed, player.attackAnimTimer);
                 updateCharacterWeapons(playerMesh, player.equippedWeapon, player.isBlocking);
             }
-
 
             const isFirstPerson = (viewMode === 0 || (player.isAiming && player.equippedWeapon === 'bow'));
             if(fpArm) {
@@ -3107,20 +2884,16 @@ function connectToServer(id, locked) {
             }
             if(playerMesh) playerMesh.visible = !isFirstPerson && !isStudioMode;
 
-
             if(attackCooldown > 0) attackCooldown--;
             if(player.attackAnimTimer > 0) player.attackAnimTimer -= 0.04;
 
-
             chunkUpdateTimer++;
             if(chunkUpdateTimer > 30) { updateTerrainChunks(); chunkUpdateTimer = 0; }
-
 
             if(isChestOpen && openChestPos) {
                 const dist = Math.sqrt((player.x - openChestPos.x)**2 + (player.y - openChestPos.y)**2 + (player.z - openChestPos.z)**2);
                 if(dist > 3.5) closeChest();
             }
-
 
             const shieldActive = (keys.ctrl || (isMobile && keys.shieldBtn)) && player.inventory.shields > 0;
             if(shieldActive !== player.isBlocking) {
@@ -3146,11 +2919,9 @@ function connectToServer(id, locked) {
                 if(p.attackAnim > 0) p.attackAnim -= 0.04;
                 animateRig(p.mesh, speed, p.attackAnim);
 
-
                 updateIndicator(p.indicator, p.mesh.position);
             });
             mobs.forEach(m => updateIndicator(m.indicator, m.mesh.position));
-
 
             renderer.render(scene, camera);
         }
@@ -3163,7 +2934,6 @@ function connectToServer(id, locked) {
             const distSpan = el.querySelector('.dist-text');
             if (distSpan) distSpan.innerText = `[${Math.round(dist3D)}m]`;
 
-
             const screenPos = pPos.clone().project(camera);
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -3175,17 +2945,14 @@ function connectToServer(id, locked) {
             const dy = y - (h/2);
             const pixelDist = Math.sqrt(dx*dx + dy*dy);
 
-
             const dirToP = pos3d.clone().sub(camera.position);
             const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir);
             const isBehind = dirToP.dot(camDir) < 0;
-
 
             if (player.isAiming && pixelDist < 100 && !isBehind) {
                 el.style.display = 'none';
                 return;
             }
-
 
             const closeRange = 75;
             
@@ -3211,7 +2978,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function animateRig(rig, speed, attackProgress) {
             if(!rig.userData) return;
             
@@ -3219,13 +2985,11 @@ function connectToServer(id, locked) {
             rig.userData.lArm.rotation.y = 0; rig.userData.rArm.rotation.y = 0;
             rig.userData.lArm.rotation.z = 0; rig.userData.rArm.rotation.z = 0;
 
-
             const isBlocking = rig.userData.weapons.shield.visible;
             if (isBlocking) {
                 rig.userData.lArm.rotation.x = 0;
                 rig.userData.lArm.rotation.y = 0;
             }
-
 
             if(attackProgress > 0) {
                 const punch = Math.sin(attackProgress * Math.PI);
@@ -3248,7 +3012,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function updatePhysics(dt) {
             // Health regeneration
             if (player.health < player.maxHealth && !isStudioMode) {
@@ -3258,7 +3021,6 @@ function connectToServer(id, locked) {
                     if (Math.floor(player.health) !== Math.floor(oldHealth)) updateStatsUI();
                 }
             }
-
 
             // Check if player is in water (3D mode only)
             if (gameDimension === '3d') {
@@ -3327,13 +3089,11 @@ function connectToServer(id, locked) {
             let collisionX = !isStudioMode && (checkCollision(nx, player.y, player.z) || checkPlayerCollision(nx, player.z));
             if(collisionX) { player.vx = 0; nx = player.x; } player.x = nx;
 
-
             let nz = player.z + player.vz * dt;
             let collisionZ = !isStudioMode && (checkCollision(player.x, player.y, nz) || checkPlayerCollision(player.x, nz));
             if(collisionZ) { player.vz = 0; nz = player.z; } player.z = nz;
             
             let ny = player.y + player.vy * dt; player.onGround = false;
-
 
             if(!isStudioMode) {
                 const groundLevel = gameDimension === '3d' ? -0.1 : 0.9;
@@ -3370,7 +3130,6 @@ function connectToServer(id, locked) {
             if(ny < -50) takeDamage('void', 'The Void');
             player.y = ny;
 
-
             const moveSpeed = Math.sqrt(player.vx**2 + player.vz**2);
             let bobOffset = 0;
             if(player.onGround && moveSpeed > 1 && !isStudioMode) {
@@ -3378,11 +3137,9 @@ function connectToServer(id, locked) {
                 if(viewMode === 0 || player.isAiming) bobOffset = Math.sin(player.walkTime * 1.5) * 0.1;
             }
 
-
             const targetFov = (keys.shift && moveSpeed > 5 && !isStudioMode) ? 85 : 70;
             camera.fov += (targetFov - camera.fov) * 0.1;
             camera.updateProjectionMatrix();
-
 
             if(isStudioMode || viewMode === 0 || player.isAiming) {
                 camera.position.set(player.x, player.y + 0.6 + bobOffset, player.z);
@@ -3392,7 +3149,6 @@ function connectToServer(id, locked) {
                 camera.position.set(player.x + dist * Math.sin(actualYaw), player.y + 2 + dist * -Math.sin(camPitch), player.z + dist * Math.cos(actualYaw));
                 camera.lookAt(player.x, player.y + 1, player.z);
             }
-
 
             for(let i=projectiles.length-1; i>=0; i--) {
                 const p = projectiles[i];
@@ -3406,7 +3162,6 @@ function connectToServer(id, locked) {
                 if(u.life <= 0) { scene.remove(p.mesh); projectiles.splice(i, 1); }
             }
         }
-
 
         function checkCollision(x, y, z) {
             const ix = Math.round(x), iz = Math.round(z);
@@ -3426,7 +3181,6 @@ function connectToServer(id, locked) {
             return false;
         }
 
-
         function checkPlayerCollision(x, z) {
             if (gameMode === 'offline') return false;
             
@@ -3437,7 +3191,6 @@ function connectToServer(id, locked) {
             }
             return false;
         }
-
 
         function createBlock(x, y, z, blockTypeId) {
             const key = `${x}_${y}_${z}`;
@@ -3503,7 +3256,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function performAction(isRightClick) {
             const maxReach = isStudioMode ? 30 : 15;
             
@@ -3543,7 +3295,6 @@ function connectToServer(id, locked) {
                 }
             }
 
-
             raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
             const intersects = raycaster.intersectObjects(scene.children);
             
@@ -3551,14 +3302,12 @@ function connectToServer(id, locked) {
                 const hit = intersects[0];
                 if(hit.distance > maxReach) return;
 
-
                 const bx = Math.round(hit.object.position.x);
                 const by = Math.round(hit.object.position.y);
                 const bz = Math.round(hit.object.position.z);
                 const key = `${bx}_${by}_${bz}`;
                 
                 if(isRightClick && chestData[key]) { openChest(bx, by, bz); return; }
-
 
                 const p = hit.point.add(hit.face.normal.multiplyScalar(0.5));
                 const x=Math.round(p.x), y=Math.round(p.y), z=Math.round(p.z);
@@ -3607,12 +3356,10 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function onMouseDown(e) {
             resetIdleTimer();
             if(isMenuOpen || isMobile || isChestOpen || isPaused) return;
             if(e.target.classList.contains('equip-icon')) return;
-
 
             if (e.button === 0) {
                 if(!isStudioMode && pvpAllowed && player.equippedWeapon === 'bow' && player.inventory.arrows > 0 && gameMode === 'online') {
@@ -3625,7 +3372,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function onMouseUp(e) {
             if(e.button === 0 && player.isAiming) {
                 player.isAiming = false;
@@ -3635,11 +3381,10 @@ function connectToServer(id, locked) {
                     updateEquipmentUI();
                     player.attackAnimTimer = 1.0;
                     shootArrow();
-                    showToast("Fired!");
+                    showToast("What are you shooting at?");
                     
                     const w = window.innerWidth;
                     const h = window.innerHeight;
-
 
                     for(let [id, p] of otherPlayers) {
                         const screenPos = p.mesh.position.clone().project(camera);
@@ -3654,21 +3399,20 @@ function connectToServer(id, locked) {
                         const dist3D = playerMesh.position.distanceTo(p.mesh.position);
                         const allowedError = Math.min(150, 2500 / dist3D);
 
-
                         if (isFront && pixelDist < allowedError && p.mesh.visible) {
                             const directHit = pixelDist < 8;
                             
                             if (directHit) {
                                 sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                showToast("🎯 Direct Hit!");
+                                showToast("W shot!");
                                 break;
                             } else {
                                 if (Math.random() < 0.30) {
                                     sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                    showToast("Lucky shot!");
+                                    showToast(“Yeah, Aimbot got ur back");
                                     break;
                                 } else {
-                                    showToast("Close miss");
+                                    showToast("No Aimbot 4 u 😂");
                                 }
                             }
                         }
@@ -3676,7 +3420,6 @@ function connectToServer(id, locked) {
                 }
             }
         }
-
 
         function sendChat() {
             resetIdleTimer();
@@ -3699,7 +3442,6 @@ function connectToServer(id, locked) {
                     return;
                 }
             }
-
 
             if(msg.startsWith('/')) {
                 if (msg.toLowerCase() === '/chat off') {
@@ -3734,7 +3476,6 @@ function connectToServer(id, locked) {
                     return;
                 }
 
-
                 if(isHost) {
                     processHostCommand(msg);
                 } else if (gameMode === 'online') {
@@ -3766,7 +3507,6 @@ function connectToServer(id, locked) {
                 addChatBubble("SYSTEM", "/unmute <player> : Unmute specific player", true);
                 return;
             }
-
 
             if (c === '/spawn' && parts[1] === 'mobs') {
                 const count = parseInt(parts[2]);
@@ -3867,10 +3607,8 @@ function connectToServer(id, locked) {
                  return;
             }
 
-
             addChatBubble("SYSTEM", "Unknown command. Type /cmd help", true);
         }
-
 
         function addChatBubble(name, msg, isSystem = false) {
             lastChatActivity = Date.now();
@@ -3881,12 +3619,10 @@ function connectToServer(id, locked) {
             c.appendChild(d); c.scrollTop = c.scrollHeight;
         }
 
-
         function toggleMenu() {
             resetIdleTimer();
             lastChatActivity = Date.now();
             if(isMenuOpen && !gameStarted) return;
-
 
             isMenuOpen = !isMenuOpen;
             if(isMenuOpen) {
@@ -3911,7 +3647,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function copyHostId() {
             if(!myPeerId) return;
             const t = document.createElement("textarea");
@@ -3926,7 +3661,6 @@ function connectToServer(id, locked) {
             t.innerText = msg; t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2000);
         }
-
 
         function toggleStudioMode(forceState) {
             if(forceState !== undefined) isStudioMode = forceState;
@@ -3956,7 +3690,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function toggleChatVisibility(forceState) {
             const chk = document.getElementById('chk-show-chat');
             const val = forceState !== undefined ? forceState : chk.checked;
@@ -3973,7 +3706,6 @@ function connectToServer(id, locked) {
             }
         }
 
-
         function switchToMobile() {
             if(isMobile) return;
             isMobile = true;
@@ -3983,7 +3715,6 @@ function connectToServer(id, locked) {
             setupTouch();
             updateStatsUI();
         }
-
 
         function switchToDesktop() {
             if(!isMobile) return;
@@ -4017,7 +3748,6 @@ function connectToServer(id, locked) {
                 stick.style.transform = `translate(-50%, -50%)`;
             });
 
-
             zoneMove.addEventListener('touchmove', e => {
                 e.preventDefault();
                 let touch = null;
@@ -4035,7 +3765,6 @@ function connectToServer(id, locked) {
                 keys.w = dy < -10; keys.s = dy > 10; keys.a = dx < -10; keys.d = dx > 10;
             });
 
-
             const endMove = (e) => {
                 for(let i=0; i<e.changedTouches.length; i++) {
                     if(e.changedTouches[i].identifier === moveTouchId) {
@@ -4046,10 +3775,8 @@ function connectToServer(id, locked) {
             };
             zoneMove.addEventListener('touchend', endMove); zoneMove.addEventListener('touchcancel', endMove);
 
-
             const zoneLook = document.getElementById('zone-look');
             let lookLastX = 0; let lookLastY = 0; let lookTouchId = null;
-
 
             zoneLook.addEventListener('touchstart', e => {
                 resetIdleTimer(); e.preventDefault();
@@ -4057,7 +3784,6 @@ function connectToServer(id, locked) {
                 lookTouchId = touch.identifier;
                 lookLastX = touch.clientX; lookLastY = touch.clientY;
             });
-
 
             zoneLook.addEventListener('touchmove', e => {
                 e.preventDefault();
@@ -4072,7 +3798,6 @@ function connectToServer(id, locked) {
                 camPitch = Math.max(-1.5, Math.min(1.5, camPitch));
                 lookLastX = touch.clientX; lookLastY = touch.clientY;
             });
-
 
             const endLook = (e) => {
                 for(let i=0; i<e.changedTouches.length; i++) {
@@ -4108,7 +3833,6 @@ function connectToServer(id, locked) {
                         const w = window.innerWidth;
                         const h = window.innerHeight;
 
-
                         for(let [id, p] of otherPlayers) {
                             const screenPos = p.mesh.position.clone().project(camera);
                             const pixelX = screenPos.x * (w/2);
@@ -4122,30 +3846,28 @@ function connectToServer(id, locked) {
                             const dist3D = playerMesh.position.distanceTo(p.mesh.position);
                             const allowedError = Math.min(150, 2500 / dist3D);
 
-
                             if (isFront && pixelDist < allowedError && p.mesh.visible) {
                                 const directHit = pixelDist < 8;
                                 
                                 if (directHit) {
                                     sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                    showToast("🎯 Direct Hit!");
+                                    showToast("w shot!");
                                     break;
                                 } else {
                                     if (Math.random() < 0.30) {
                                         sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                        showToast("Lucky shot!");
+                                        showToast("Yeah, Aimbot got ur back");
                                         break;
                                     } else {
-                                        showToast("Close miss");
+                                        showToast("No Aimbot 4 u 😂");
                                     }
                                 }
                             }
                         }
-                        showToast("Fired!");
+                        showToast("What are you shooting at?");
                     }
                 }
             });
-
 
             document.getElementById('btn-action-place').addEventListener('touchstart', e => { resetIdleTimer(); e.preventDefault(); performAction(true); });
             document.getElementById('btn-studio-toggle').addEventListener('touchstart', e => { resetIdleTimer(); e.preventDefault(); toggleStudioMode(); });
@@ -4173,7 +3895,6 @@ function connectToServer(id, locked) {
                              active === document.getElementById('remote-id');
             
             if (isTyping) { if(e.key === 'Escape') active.blur(); return; }
-
 
             if(isMobile) switchToDesktop();
             
@@ -4213,11 +3934,9 @@ function connectToServer(id, locked) {
             }
         }
 
-
         initEngine();
     </script>
 </body>
 </html>
-
 
 ©Midkid808 2026
