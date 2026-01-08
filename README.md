@@ -1,2 +1,0 @@
-# djbombtom44.github.io
-SERVERWORLD (UPDATES EVERY MONTH)
