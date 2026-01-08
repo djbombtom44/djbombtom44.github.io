@@ -2,6 +2,8 @@ What this is:
 This, is ServerWorld, it is a minecraft/roblox hybrid that I have created. 
 You can chat, fight, build, and explore (When 3D mode comes out very soon)
 
+I need to update the studio mode and pvp allowing for the hosts... dont worrry I hear y'all!
+
 Origanally, This was supposed to be an entirely diffrent game but my partner (@Jaxamillon (May not be on github yet) ) and I Djbombtom44 (Midkid808)
 did not have the time to work together to make it so i decided to make this as a placeholder and you get accustomed to game designing.
 
