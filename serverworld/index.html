@@ -1,0 +1,4223 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+.container {
+  position: relative; /* Needed to position the footer correctly */
+  min-height: 150px; /* Example height for the container */
+  border: 1px solid #ccc; /* Optional: adds a border so you can see the container */
+  padding-bottom: 30px; /* Adds space for the footer at the bottom */
+}
+
+
+.caption-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center; /* Centers the text */
+  font-size: 0.8em; /* Makes the text smaller */
+  color: #888; /* Makes the text gray */
+  padding: 5px 0;
+  background-color: #f9f9f9; /* Optional: gives the footer a background color */
+}
+</style>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>ServerWorld v0.0.3 (v4)</title>
+    
+    <!-- LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                return false;
+            });
+
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
+                if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
+            });
+
+
+            document.body.style.userSelect = 'none';
+            document.body.style.webkitUserSelect = 'none';
+        });
+
+
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            console.error('Error: ' + msg + '\nLine: ' + lineNo);
+            return false;
+        };
+    </script>
+
+
+    <style>
+        body { 
+            margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            touch-action: none; user-select: none; -webkit-user-select: none; 
+        }
+        #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 50; display: none;
+        }
+
+
+        #hurt-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(255,0,0,0.6) 100%);
+            opacity: 0; pointer-events: none; transition: opacity 0.1s; z-index: 9;
+        }
+
+
+        #water-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 100, 200, 0.3);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 8;
+        }
+
+
+        #penalty-banner {
+            position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+            background: repeating-linear-gradient(45deg, #cc0000, #cc0000 10px, #ff0000 10px, #ff0000 20px);
+            color: white; padding: 8px 16px; font-weight: bold; border: 2px solid white;
+            box-shadow: 0 5px 15px black; z-index: 100; text-align: center; display: none;
+            pointer-events: none; font-size: 14px;
+        }
+
+
+        .top-bar {
+            background: rgba(0,0,0,0.7); color: white; padding: 8px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(5px); pointer-events: auto;
+        }
+
+
+        .mode-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 4px 12px; border-radius: 4px;
+            font-weight: bold; text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(102,126,234,0.5); font-size: 11px;
+            width: 100px; text-align: center;
+        }
+        .mode-studio { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 0 10px rgba(245,87,108,0.5); }
+        .mode-offline { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 0 10px rgba(0,242,254,0.5); }
+        .mode-3d { background: linear-gradient(135deg, #ff9a00 0%, #ff6a00 100%); box-shadow: 0 0 10px rgba(255,154,0,0.5); }
+
+
+        .btn-menu {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white;
+            padding: 4px 10px; cursor: pointer; font-weight: bold; border-radius: 4px;
+            backdrop-filter: blur(10px); transition: all 0.2s; font-size: 11px;
+        }
+        .btn-menu:hover { background: rgba(255,255,255,0.2); }
+
+
+        #stats-container {
+            position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+            width: 220px; display: flex; flex-direction: column; gap: 4px; pointer-events: none;
+        }
+        .bar-wrap {
+            width: 100%; height: 14px; background: rgba(0,0,0,0.7); border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        #health-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #ff3333, #ff6666); transition: width 0.2s ease-out; }
+        #armor-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #3333ff, #6666ff); transition: width 0.2s ease-out; }
+        #shield-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ffd700, #ffed4e); transition: width 0.2s ease-out; }
+        #oxygen-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00bfff, #87ceeb); transition: width 0.2s ease-out; }
+        
+        .bar-text {
+            position: absolute; top: 0; left: 0; width: 100%; text-align: center;
+            font-size: 10px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black;
+            line-height: 14px; z-index: 2;
+        }
+
+
+        #equipment-display {
+            position: absolute; bottom: 15px; left: 15px;
+            display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+            pointer-events: none; z-index: 20; 
+        }
+        .equip-icon {
+            font-size: 13px; color: white; text-shadow: 1px 1px 0 #000;
+            background: rgba(0,0,0,0.7); padding: 5px 8px; border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.3); display: none;
+            pointer-events: auto; cursor: pointer; transition: all 0.1s; user-select: none;
+            backdrop-filter: blur(5px);
+        }
+        .equip-icon:hover { transform: scale(1.05); background: rgba(50,50,50,0.9); }
+        .equip-icon.visible { display: block; }
+        .equip-icon.selected { 
+            border-color: #00ff00; 
+            background: linear-gradient(135deg, rgba(0, 200, 0, 0.8), rgba(0, 100, 0, 0.8));
+            box-shadow: 0 0 15px #00ff00; 
+        }
+
+
+        /* INVENTORY UI */
+        #inventory-ui {
+            position: absolute; bottom: 120px; right: 15px;
+            background: rgba(0,0,0,0.85); border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px; border-radius: 8px; pointer-events: auto;
+            backdrop-filter: blur(10px); max-width: 250px;
+        }
+        #inventory-ui h4 {
+            margin: 0 0 8px 0; color: #fff; font-size: 12px; text-align: center;
+        }
+        .inv-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 4px 8px; margin: 2px 0; background: rgba(255,255,255,0.1);
+            border-radius: 4px; font-size: 11px; color: #fff;
+        }
+        .inv-item-name { flex: 1; }
+        .inv-item-count { 
+            background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 3px;
+            font-weight: bold; min-width: 30px; text-align: center;
+        }
+
+
+        #chest-modal {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #C6C6C6, #A0A0A0); 
+            padding: 10px; border: 4px solid #555; width: 90%; max-width: 400px;
+            z-index: 100; pointer-events: auto; text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9); font-family: monospace;
+            border-radius: 8px;
+        }
+        #chest-modal h3 { 
+            margin: 0 0 10px 0; color: #fff; 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 8px; border: 2px solid #555; border-radius: 4px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .chest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 300px; overflow-y: auto; }
+        .chest-slot {
+            background: linear-gradient(135deg, #8B8B8B, #6B6B6B);
+            border: 2px solid #FFF; padding: 8px; cursor: pointer;
+            color: white; font-size: 11px; height: 60px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: all 0.2s;
+            touch-action: manipulation; border-radius: 4px;
+        }
+        .chest-slot:hover { 
+            background: linear-gradient(135deg, #A0A0A0, #808080);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        .close-btn {
+            position: absolute; top: -15px; right: -15px; background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white; border: 2px solid white; width: 30px; height: 30px; cursor: pointer;
+            border-radius: 50%; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            transform: translate(-50%, -50%); pointer-events: none; opacity: 0.6; z-index: 5;
+        }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; box-shadow: 0 0 3px black; }
+        #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
+        #crosshair::after { top: 0; left: 9px; width: 2px; height: 20px; }
+
+
+        /* MODE SELECTION SCREEN */
+        #mode-selection {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; pointer-events: auto;
+        }
+        #mode-selection.hidden { display: none; }
+        
+        .mode-selection-title {
+            color: white; font-size: 48px; font-weight: bold; margin-bottom: 20px;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .mode-buttons {
+            display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;
+        }
+        
+        .mode-button {
+            width: 200px; height: 200px; border-radius: 20px;
+            border: 4px solid white; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            font-weight: bold; color: white; font-size: 24px;
+            position: relative; overflow: hidden;
+        }
+        
+        .mode-button::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.9; z-index: 0;
+        }
+        
+        .mode-online::before { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .mode-offline::before { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        
+        .mode-button:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+        
+        .mode-button-content {
+            z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+        
+        .mode-icon { font-size: 64px; }
+
+
+        /* DIMENSION SELECTION */
+        #dimension-selection {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; pointer-events: auto;
+        }
+        #dimension-selection.hidden { display: none; }
+        
+        /* PAUSE MENU (Minecraft-style) */
+        #pause-menu {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 500; pointer-events: auto;
+        }
+        
+        .pause-menu-box {
+            background: rgba(20, 20, 30, 0.95); padding: 30px; border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.2); min-width: 300px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+        
+        .pause-menu-title {
+            color: white; font-size: 24px; text-align: center; margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .pause-menu-buttons {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        
+        .pause-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 12px; border-radius: 4px; cursor: pointer;
+            font-size: 14px; font-weight: bold; transition: all 0.2s;
+            text-align: center;
+        }
+        .pause-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+
+
+        #menu-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 20;
+            pointer-events: auto; color: white; overflow-y: auto; padding: 20px 0;
+        }
+        #menu-overlay.hidden { display: none; }
+        
+        .menu-box {
+            background: rgba(20, 20, 30, 0.9); padding: 30px; border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2); text-align: center; max-width: 400px; width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); margin: auto; position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        .close-menu-x {
+            position: absolute; top: 10px; right: 15px; color: #ff4444; font-size: 24px;
+            font-weight: bold; cursor: pointer; z-index: 50; transition: color 0.2s;
+            font-family: sans-serif;
+        }
+        .close-menu-x:hover { color: white; }
+        
+        h2 { color: #ffffff; margin-top: 0; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+
+
+        .input-group { margin: 15px 0; text-align: left; }
+        label { display: block; color: #ddd; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+            color: white; border-radius: 6px; font-size: 14px; box-sizing: border-box;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus { 
+            border-color: rgba(255,255,255,0.6); outline: none; 
+        }
+
+
+        .btn-row { display: flex; gap: 10px; margin-top: 15px; }
+        
+        button {
+            padding: 10px; border: none; border-radius: 6px;
+            font-weight: bold; cursor: pointer; transition: all 0.2s;
+            font-size: 13px; width: 100%;
+        }
+        button:active { transform: scale(0.95); }
+        button:disabled { background: #555; color: #888; cursor: not-allowed; transform: none; }
+
+
+        .btn-host { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+        .btn-join { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; }
+        .btn-copy { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); margin-top: 10px; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; margin-top: 10px; }
+        .btn-danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: white; margin-top: 10px; }
+        .btn-success { background: linear-gradient(135deg, #00ff00, #00aa00); color: white; margin-top: 10px; }
+        
+        .btn-close-mobile { display: none; background: #ff4444; color: white; margin-top: 15px; }
+
+
+        .checkbox-row { text-align: left; margin-top: 12px; display: flex; align-items: center; gap: 8px; color: #ddd; font-size: 13px; }
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+
+        #host-id-display {
+            background: rgba(0,0,0,0.5); padding: 12px; border-radius: 6px; margin: 15px 0;
+            font-family: monospace; font-size: 16px; color: #ffffff; border: 1px dashed rgba(255,255,255,0.3);
+            display: none; word-break: break-all;
+        }
+        
+        #host-player-list {
+            background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; margin: 10px 0;
+            font-size: 11px; max-height: 100px; overflow-y: auto; text-align: left; color: #ddd;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .plist-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 3px 0; }
+
+
+        #host-section, #join-section { display: none; }
+        #main-menu-btns { display: block; }
+        
+        #server-browser-list {
+            margin-top: 12px; max-height: 150px; overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); border-radius: 4px;
+        }
+        .server-item {
+            padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: white;
+            text-align: left; cursor: pointer; transition: background 0.1s;
+            display: flex; justify-content: space-between; font-size: 12px;
+        }
+        .server-item:hover { background: rgba(255,255,255,0.1); }
+        .server-lock { color: #ffaa00; font-size: 11px; }
+
+
+        #host-info-panel {
+            display: none; align-items: center; gap: 8px; 
+            background: rgba(255,255,255,0.1); padding: 4px 10px; 
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); margin-left: 10px;
+        }
+        #ingame-host-id {
+            font-family: monospace; color: #ffffff; letter-spacing: 1px;
+            font-weight: bold; font-size: 11px;
+        }
+        .mini-copy-btn {
+            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);
+            padding: 2px 6px; border-radius: 4px; cursor: pointer;
+            font-size: 9px; text-transform: uppercase; width: auto;
+        }
+
+
+        #toolbar {
+            pointer-events: auto; background: rgba(0,0,0,0.8); padding: 8px;
+            display: flex; gap: 4px; justify-content: center; opacity: 0; transition: opacity 0.2s;
+            border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap; max-width: 90%;
+        }
+        #toolbar.visible { opacity: 1; }
+
+
+        .block-btn {
+            width: 40px; height: 40px; border: 2px solid white; cursor: pointer; border-radius: 4px;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: white; font-weight: bold; text-align: center;
+            background-size: cover; background-position: center;
+        }
+        .block-btn:hover { transform: scale(1.1); }
+        .block-btn.active { border-color: yellow; transform: scale(1.2); box-shadow: 0 0 10px rgba(255,255,0,0.5); }
+
+
+        #chat-container {
+            position: absolute; top: 55px; left: 8px;
+            pointer-events: auto; width: 280px; height: 140px;
+            background: rgba(0,0,0,0.7); border-radius: 8px;
+            display: flex; flex-direction: column; transition: opacity 0.5s;
+            z-index: 60; backdrop-filter: blur(5px);
+        }
+        #chat-container.faded { opacity: 0.1; }
+        #chat-container.faded:hover { opacity: 1; }
+        
+        #chat-messages {
+            flex: 1; overflow-y: auto; padding: 8px; color: white;
+            font-size: 12px; text-shadow: 1px 1px 2px #000;
+        }
+        #chat-input {
+            background: rgba(0,0,0,0.5); border: none; border-top: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 8px; outline: none; border-radius: 0 0 8px 8px;
+            font-size: 12px;
+        }
+        .chat-msg { margin-bottom: 4px; }
+        .chat-name { font-weight: bold; color: #87CEEB; }
+        .chat-system { color: #f0f0f0; font-style: italic; }
+
+
+        #toast {
+            position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9); color: white; padding: 8px 16px;
+            border-radius: 20px; font-size: 13px; pointer-events: none;
+            opacity: 0; transition: opacity 0.3s; z-index: 100; border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+
+        #kick-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; color: red; display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        #kick-screen h1 { font-size: 36px; margin-bottom: 20px; border: 4px solid red; padding: 15px; }
+        #kick-screen button { width: auto; padding: 10px 30px; font-size: 20px; }
+        #kick-screen .reason { font-size: 18px; margin-bottom: 20px; color: white; }
+
+
+        #mobile-controls {
+            display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 15;
+        }
+        
+        .touch-zone-left { position: absolute; bottom: 0; left: 0; width: 40%; height: 50%; pointer-events: auto; }
+        .touch-zone-right { position: absolute; bottom: 0; right: 0; width: 60%; height: 50%; pointer-events: auto; }
+
+
+        .joystick-base {
+            position: absolute; width: 100px; height: 100px;
+            background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%; pointer-events: none; display: none;
+            transform: translate(-50%, -50%); backdrop-filter: blur(5px);
+        }
+        .joystick-stick {
+            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px;
+            background: rgba(255, 255, 255, 0.6); border-radius: 50%;
+            transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+
+        .mob-btn {
+            position: absolute; width: 55px; height: 55px;
+            background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%; color: white; font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: auto; touch-action: manipulation; user-select: none;
+            font-size: 11px; backdrop-filter: blur(5px); transition: all 0.1s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .mob-btn:active { background: rgba(102, 126, 234, 0.8); transform: scale(0.9); }
+        .mob-btn.active { background: rgba(245, 87, 108, 0.9); border-color: #f5576c; }
+
+
+        #btn-jump { bottom: 35px; right: 15px; width: 65px; height: 65px; background: rgba(0,150,0,0.6); }
+        #btn-shift { bottom: 35px; right: 90px; font-size: 9px; }
+        
+        #btn-action-place { bottom: 115px; right: 15px; background: rgba(0,0,150,0.6); flex-direction:column; line-height:1.1em; }
+        #btn-action-break { bottom: 115px; right: 80px; background: rgba(150,0,0,0.6); width: 65px; font-size:9px; line-height:1.1em; flex-direction:column; }
+        
+        #btn-studio-toggle { top: 55px; right: 8px; width: 48px; height: 48px; border-radius: 8px; }
+        
+        #btn-shield { 
+            bottom: 115px; right: 155px; width: 55px; height: 55px; 
+            background: rgba(255,215,0,0.5); border-color: gold; display: none;
+            font-size: 9px;
+        }
+        #btn-shield.active { background: rgba(255,215,0,0.9); }
+
+
+        @media (max-width: 800px) {
+            #chat-container { width: 200px; height: 110px; font-size: 11px; top: 48px; left: 6px; }
+            .controls-hint { display: none; }
+            #stats-container { width: 180px; bottom: 60px; }
+            .bar-wrap { height: 12px; }
+            .bar-text { font-size: 9px; line-height: 12px; }
+            .menu-box { width: 95%; margin: 15px auto; padding: 20px; }
+            .btn-close-mobile { display: block; }
+            .mode-selection-title { font-size: 32px; }
+            .mode-button { width: 150px; height: 150px; font-size: 18px; }
+            .mode-icon { font-size: 48px; }
+            
+            #equipment-display {
+                bottom: 15px; left: 15px; transform: none;
+                flex-direction: column; align-items: flex-start; gap: 4px; width: max-content;
+            }
+            .equip-icon { font-size: 14px; padding: 6px 8px; }
+            #inventory-ui { bottom: 90px; right: 10px; max-width: 200px; font-size: 10px; }
+        }
+        
+        #indicators-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; overflow: hidden; z-index: 5;
+        }
+        .player-indicator {
+            position: absolute; background: rgba(0, 0, 0, 0.75); color: #ffffff; padding: 4px 8px;
+            border-radius: 4px; font-size: 11px; font-weight: bold; font-family: 'Segoe UI', sans-serif; white-space: nowrap;
+            transform: translate(-50%, -50%); border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 0 10px rgba(0,0,0,0.7);
+            display: none; text-align: center; backdrop-filter: blur(5px);
+        }
+        .indicator-health { display: block; width: 100%; height: 4px; background: #333; margin-top: 2px; border-radius: 2px; }
+        .indicator-health-bar { height: 100%; background: linear-gradient(90deg, #00ff00, #88ff88); width: 100%; transition: width 0.2s ease-out; border-radius: 2px; }
+        .dist-text { color: #ccc; font-size: 9px; margin-left: 4px; }
+        
+        .save-load-container {
+            margin-top: 15px; display: flex; gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div id="hurt-overlay"></div>
+    <div id="water-overlay"></div>
+
+
+    <div id="penalty-banner">
+        SERVER RECOVERY MODE<br>
+        <span style="font-size:11px; font-weight:normal;">View forced to LOW due to overload.</span><br>
+        Time remaining: <span id="penalty-timer">5:00</span>
+    </div>
+
+
+    <!-- MODE SELECTION SCREEN -->
+    <div id="mode-selection">
+        <div class="mode-selection-title"> 🔥SERVERWORLD🔥 </div>
+<footer class="caption-footer">
+   ©Midkid808 2026
+  </footer>
+
+
+        <div class="mode-buttons">
+            <div class="mode-button mode-online" onclick="selectMode('online')">
+                <div class="mode-button-content">
+                    <div class="mode-icon">🌐</div>
+                    <div>ONLINE</div>
+                </div>
+            </div>
+            <div class="mode-button mode-offline" onclick="selectMode('offline')">
+                <div class="mode-button-content">
+                    <div class="mode-icon">🚫🌐</div>
+                    <div>OFFLINE</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DIMENSION SELECTION SCREEN -->
+    <div id="dimension-selection">
+        <div class="mode-selection-title"> SELECT DIMENSION </div>
+        <div class="mode-buttons">
+            <div class="mode-button mode-online" onclick="selectDimension('2d')">
+                <div class="mode-button-content">
+                    <div class="mode-icon">🫓</div>
+                    <div>2D MODE</div>
+                    <div style="font-size:12px; margin-top:10px;">The OG World</div>
+                </div>
+            </div>
+            <div class="mode-button mode-offline" onclick="selectDimension('3d')">
+                <div class="mode-button-content">
+                    <div class="mode-icon">🧊</div>
+<footer class="caption-footer">
+    Not ready (Working hard to get it done!)
+  </footer>
+
+
+                    <div>3D MODE</div>
+                    <div style="font-size:12px; margin-top:10px;">Layered Voxel World</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- PAUSE MENU -->
+    <div id="pause-menu">
+        <div class="pause-menu-box">
+            <div class="pause-menu-title">GAME PAUSED</div>
+            <div class="pause-menu-buttons" id="pause-menu-buttons">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+
+    <div id="equipment-display">
+        <div id="icon-sword" class="equip-icon" onclick="equipWeapon('sword')">⚔️ Sword</div>
+        <div id="icon-bow" class="equip-icon" onclick="equipWeapon('bow')">🏹 Bow</div>
+        <div id="icon-arrow" class="equip-icon">➵ 0</div>
+    </div>
+
+
+    <div id="inventory-ui">
+        <h4>📦 INVENTORY</h4>
+        <div id="inventory-list"></div>
+    </div>
+
+
+    <div id="kick-screen">
+        <h1 id="kick-title">DISCONNECTED</h1>
+        <div class="reason" id="kick-reason"></div>
+        <button onclick="location.reload()">REJOIN</button>
+    </div>
+
+
+    <div id="canvas-container"></div>
+    <div id="crosshair"></div>
+    <div id="toast">ID Copied to Clipboard</div>
+
+
+    <!-- Menu -->
+    <div id="menu-overlay">
+        <div class="menu-box">
+            <div class="close-menu-x" id="menu-close-x" onclick="toggleMenu()" style="display: none;">✕</div>
+
+
+            <h2>ServerWorld 0.0.3</h2>
+            
+            <div class="input-group">
+                <label>Display Name</label>
+                <input type="text" id="username" placeholder="Player1" maxlength="12">
+            </div>
+
+
+            <div class="input-group">
+                <label>Updates Per Second (10-120)</label>
+                <input type="number" id="ups-input" value="60" min="10" max="120">
+            </div>
+
+
+            <div class="input-group">
+                <label>Vision Distance</label>
+                <select id="vision-dist-select" onchange="updateViewDistance()">
+                    <option value="1">Low (3x3)</option>
+                    <option value="2" selected>Normal (5x5)</option>
+                    <option value="5">High (11x11)</option>
+                    <option value="12">Use at your own risk (25x25)</option>
+                </select>
+            </div>
+
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="chk-show-chat" checked onchange="toggleChatVisibility()">
+                <span>Show Chat</span>
+            </div>
+
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="chk-textures" checked onchange="toggleTextures()">
+                <span>Enable Block Textures</span>
+            </div>
+            
+            <div class="checkbox-row" id="joystick-checkbox" style="display:none;">
+                <input type="checkbox" id="chk-show-joystick" onchange="toggleJoystickVisibility()">
+                <span>Show Movement Joystick</span>
+            </div>
+
+
+            <button id="btn-view-toggle" class="btn-secondary" onclick="toggleViewMode()" style="margin-bottom: 15px;">View: Third Person</button>
+
+
+            <div id="main-menu-btns">
+                <button class="btn-host" onclick="showHostSection()">HOST GAME</button>
+                <button class="btn-join" onclick="showJoinSection()" style="margin-top:10px;">JOIN GAME</button>
+                <button id="btn-leave-game" class="btn-danger" onclick="leaveGame()" style="display: none;">LEAVE GAME</button>
+                
+                <div class="save-load-container" id="offline-save-load" style="display:none;">
+                    <button class="btn-success" onclick="saveOfflineWorld()">SAVE WORLD</button>
+                    <button class="btn-secondary" onclick="loadOfflineWorld()">LOAD WORLD</button>
+                </div>
+            </div>
+
+
+            <!-- Host Section -->
+            <div id="host-section">
+                <div class="input-group">
+                    <label>Server Name</label>
+                    <input type="text" id="server-name" placeholder="My Awesome Server" maxlength="20">
+                </div>
+                <div class="input-group">
+                    <label>Server Password (Optional)</label>
+                    <input type="password" id="server-password" placeholder="Leave empty for open">
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="chk-server-private">
+                    <span>Private Server (Hidden from list)</span>
+                </div>
+
+
+                <div id="host-id-display">Generating ID...</div>
+                
+                <div style="text-align: left; color:#ddd; margin-top:10px; font-size:11px;">Connected Players:</div>
+                <div id="host-player-list">No other players</div>
+
+
+                <div class="checkbox-row">
+                    <input type="checkbox" id="chk-allow-studio" checked onchange="toggleStudioPermission()">
+                    <span>Allow Studio Mode</span>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="chk-allow-pvp" checked onchange="togglePvPPermission()">
+                    <span>Allow PvP</span>
+                </div>
+                <button class="btn-copy" onclick="copyHostId()">Copy ID</button>
+                
+                <button class="btn-host" id="btn-start-playing" onclick="startHostGame()" style="margin-top:10px;">START SERVER</button>
+                <button class="btn-danger" id="btn-close-server" onclick="closeServer()" style="margin-top:10px; display: none;">CLOSE SERVER</button>
+                <button class="btn-secondary" id="btn-back-host" onclick="resetMenu()">BACK</button>
+            </div>
+
+
+            <div id="join-section">
+                <div id="server-browser-list">
+                    <div style="padding:10px; color:#ddd; text-align:center;">Searching for servers...</div>
+                </div>
+                <div style="text-align:center; color:#aaa; font-size:9px; margin-bottom:10px;">If it doesn’t work then I might have stopped the github websocket server or there is a browser error… Sorry either way 🫠</div>
+
+
+                <div class="input-group">
+                    <label>Direct Connect (ID)</label>
+                    <input type="text" id="remote-id" placeholder="Paste ID here if private">
+                </div>
+                <button class="btn-join" onclick="joinGame()">CONNECT TO ID</button>
+                <button class="btn-secondary" onclick="resetMenu()">BACK</button>
+            </div>
+
+
+            <button class="btn-secondary btn-close-mobile" id="menu-close-mobile" onclick="toggleMenu()" style="display: none;">CLOSE MENU</button>
+            
+            <div id="loading-msg" style="display:none; color: #ffffff; margin-top:15px; font-weight:bold;">
+                Connecting...
+            </div>
+        </div>
+    </div>
+
+
+    <!-- In-Game UI -->
+    <div id="ui-layer">
+        <div id="indicators-container"></div>
+
+
+        <div class="top-bar">
+            <div style="display:flex; align-items:center;">
+                <div id="mode-badge" class="mode-badge">PLAY MODE</div>
+                <div id="host-info-panel">
+                    <span style="color:#ddd; font-size:10px; text-transform:uppercase;">ID:</span>
+                    <span id="ingame-host-id"></span>
+                    <button class="mini-copy-btn" onclick="copyHostId()">Copy</button>
+                </div>
+            </div>
+            <div>
+                <span class="controls-hint">[WASD] Move &nbsp; [SHIFT] Run &nbsp; [SPACE] Jump &nbsp; [TAB] Build &nbsp; [\] Menu &nbsp; [L-Click] Atk &nbsp; [R-Click] Use &nbsp; [CTRL] Shield</span>
+                <button class="btn-menu" onclick="openPauseMenu()">MENU</button>
+            </div>
+        </div>
+
+
+        <div id="stats-container">
+            <div class="bar-wrap" id="bar-oxygen-wrap" style="display:none;">
+                <div id="oxygen-fill"></div>
+                <div class="bar-text" id="oxygen-text">Oxygen: 100</div>
+            </div>
+            <div class="bar-wrap" id="bar-shield-wrap" style="display:none;">
+                <div id="shield-fill"></div>
+                <div class="bar-text" id="shield-text">Shield: 0</div>
+            </div>
+            <div class="bar-wrap">
+                <div id="armor-fill"></div>
+                <div class="bar-text" id="armor-text">Armor: 0</div>
+            </div>
+            <div class="bar-wrap">
+                <div id="health-fill"></div>
+                <div class="bar-text" id="health-text">HP: 100</div>
+            </div>
+        </div>
+        
+        <div id="chest-modal">
+            <button class="close-btn" onclick="closeChest()">X</button>
+            <h3>SUPPLIES CHEST</h3>
+            <div id="chest-items" class="chest-grid"></div>
+        </div>
+
+
+        <div id="chat-container">
+            <div id="chat-messages"></div>
+            <input type="text" id="chat-input" placeholder="Tap to chat or use /cmd..." maxlength="50">
+        </div>
+
+
+        <div style="display:flex; flex-direction:row; align-items:flex-end; width:100%; height: 100%; padding-bottom: 15px; box-sizing: border-box; pointer-events: none;">
+            <div style="flex:1; display:flex; justify-content:center; pointer-events: none;">
+                <div id="toolbar"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="mobile-controls">
+        <div class="touch-zone-left" id="zone-move"></div>
+        <div class="touch-zone-right" id="zone-look"></div>
+        <div id="joystick-visual" class="joystick-base">
+            <div class="joystick-stick"></div>
+        </div>
+        <div class="mob-btn" id="btn-action-break"><span>ATK</span><span>BRK</span></div>
+        <div class="mob-btn" id="btn-action-place"><span>PLACE</span><span>OPEN</span></div>
+        <div class="mob-btn" id="btn-shift">RUN</div>
+        <div class="mob-btn" id="btn-jump">JUMP</div>
+        <div class="mob-btn" id="btn-shield">SHIELD</div>
+        <div class="mob-btn" id="btn-studio-toggle" style="pointer-events: auto;">STUDIO</div>
+    </div>
+
+
+    <script>
+        // --- GLOBAL GAME MODE & DIMENSION ---
+        let gameMode = null; // 'online' or 'offline'
+        let gameDimension = null; // '2d' or '3d'
+        let offlineWorldData = null;
+        let showJoystick = false;
+        let texturesEnabled = true;
+
+
+        // --- BLOCK TYPES (Minecraft-style) ---
+        const BLOCK_TYPES = {
+            STONE: { id: 0, name: 'Stone', color: '#808080', texture: null },
+            DIRT: { id: 1, name: 'Dirt', color: '#8B4513', texture: null },
+            GRASS: { id: 2, name: 'Grass', color: '#228B22', texture: null },
+            WOOD: { id: 3, name: 'Wood', color: '#8B4513', texture: null },
+            LEAVES: { id: 4, name: 'Leaves', color: '#228B22', texture: null },
+            SAND: { id: 5, name: 'Sand', color: '#F4A460', texture: null },
+            COBBLESTONE: { id: 6, name: 'Cobblestone', color: '#696969', texture: null },
+            BRICK: { id: 7, name: 'Brick', color: '#B22222', texture: null },
+            WATER: { id: 8, name: 'Water', color: '#1E90FF', texture: null, transparent: true },
+        };
+
+
+        const BLOCK_ID_TO_TYPE = {};
+        Object.keys(BLOCK_TYPES).forEach(key => {
+            BLOCK_ID_TO_TYPE[BLOCK_TYPES[key].id] = BLOCK_TYPES[key];
+        });
+
+
+        let selectedBlockType = BLOCK_TYPES.STONE;
+
+
+        function selectMode(mode) {
+            gameMode = mode;
+            document.getElementById('mode-selection').classList.add('hidden');
+            document.getElementById('dimension-selection').style.display = 'flex';
+        }
+
+
+        function selectDimension(dimension) {
+            gameDimension = dimension;
+            document.getElementById('dimension-selection').style.display = 'none';
+            document.getElementById('menu-overlay').classList.remove('hidden');
+            
+            const badge = document.getElementById('mode-badge');
+            if (gameMode === 'offline') {
+                badge.classList.add('mode-offline');
+                badge.innerText = 'OFFLINE MODE';
+                document.getElementById('offline-save-load').style.display = 'flex';
+                
+                document.querySelector('.btn-host').style.display = 'none';
+                document.querySelector('.btn-join').style.display = 'none';
+                
+                if (!document.getElementById('btn-start-offline')) {
+                    const btn = document.createElement('button');
+                    btn.id = 'btn-start-offline';
+                    btn.className = 'btn-success';
+                    btn.innerText = 'START GAME';
+                    btn.onclick = startOfflineGame;
+                    document.getElementById('main-menu-btns').prepend(btn);
+                }
+            } else {
+                initServerBrowser();
+            }
+
+
+            if (gameDimension === '3d') {
+                badge.classList.add('mode-3d');
+                badge.innerText += ' (3D)';
+            }
+            
+            if (isMobile) {
+                document.getElementById('joystick-checkbox').style.display = 'flex';
+            }
+        }
+
+
+        function startOfflineGame() {
+            isMenuOpen = false;
+            document.getElementById('menu-overlay').classList.add('hidden');
+            document.getElementById('ui-layer').style.display = 'flex';
+            gameStarted = true;
+            updateCloseButtons();
+            startGame();
+            showToast("Offline Game Started");
+        }
+
+
+        function saveOfflineWorld() {
+            const worldData = {
+                dimension: gameDimension,
+                player: {
+                    x: player.x, y: player.y, z: player.z,
+                    health: player.health, armor: player.armor,
+                    inventory: player.inventory,
+                    shieldDurability: player.shieldDurability,
+                    blockInventory: player.blockInventory
+                },
+                blocks: [],
+                chests: chestData,
+                timestamp: Date.now()
+            };
+            
+            worldBlocks.forEach((mesh, key) => {
+                const [x, y, z] = key.split('_').map(Number);
+                const blockType = mesh.userData.blockType || 0;
+                worldData.blocks.push({ x, y, z, type: blockType });
+            });
+            
+            localStorage.setItem('serverworld_offline_save', JSON.stringify(worldData));
+            showToast("World Saved!");
+        }
+
+
+        function loadOfflineWorld() {
+            const savedData = localStorage.getItem('serverworld_offline_save');
+            if (!savedData) {
+                showToast("No save found!");
+                return;
+            }
+            
+            try {
+                const worldData = JSON.parse(savedData);
+                offlineWorldData = worldData;
+                showToast("World Loaded!");
+                
+                if (gameStarted && gameMode === 'offline') {
+                    applyOfflineWorldData(worldData);
+                }
+            } catch (e) {
+                showToast("Failed to load world");
+            }
+        }
+
+
+        function applyOfflineWorldData(data) {
+            worldBlocks.forEach(mesh => {
+                scene.remove(mesh);
+                mesh.geometry.dispose();
+                if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(m => m.dispose());
+                } else {
+                    mesh.material.dispose();
+                }
+            });
+            worldBlocks.clear();
+            
+            data.blocks.forEach(b => {
+                createBlock(b.x, b.y, b.z, b.type);
+            });
+            
+            player.x = data.player.x;
+            player.y = data.player.y;
+            player.z = data.player.z;
+            player.health = data.player.health;
+            player.armor = data.player.armor;
+            player.inventory = data.player.inventory;
+            player.shieldDurability = data.player.shieldDurability;
+            player.blockInventory = data.player.blockInventory || {};
+            
+            Object.assign(chestData, data.chests);
+            
+            updateStatsUI();
+            updateEquipmentUI();
+            updateInventoryUI();
+        }
+
+
+        function toggleJoystickVisibility() {
+            showJoystick = document.getElementById('chk-show-joystick').checked;
+        }
+
+
+        function toggleTextures() {
+            texturesEnabled = document.getElementById('chk-textures').checked;
+            
+            worldBlocks.forEach((mesh, key) => {
+                const blockType = mesh.userData.blockType || 0;
+                updateBlockAppearance(mesh, blockType);
+            });
+            
+            showToast(texturesEnabled ? "Textures Enabled" : "Textures Disabled");
+        }
+
+
+// --- SERVER BROWSER LOGIC ---
+let wsClient = null;
+let serverBrowserMap = new Map();
+let serverPassword = "";
+let presenceInterval = null;
+
+
+// 1. YOUR ONLINE URL (From GitHub Codespaces)
+const ONLINE_URL = 'wss://super-duper-space-waffle-5g7pgqj9569jcp4wj-8080.app.github.dev'; 
+
+
+// 2. AUTO-SWITCHER
+// If testing on your computer, use localhost:8080.
+// If online, use the GitHub URL.
+let WS_URL;
+if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    WS_URL = 'ws://localhost:8080';
+    console.log("Using Local Server:", WS_URL);
+} else {
+    WS_URL = ONLINE_URL;
+    console.log("Using Online Server:", WS_URL);
+}
+
+
+// Helper to prevent hacking (XSS) via server names
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag]));
+}
+
+
+function initServerBrowser() {
+    // dependency: gameMode must be defined globally
+    if (typeof gameMode !== 'undefined' && gameMode === 'offline') return; 
+    
+    // Don't connect if already connected
+    if (wsClient && wsClient.readyState <= 1) return;
+    
+    console.log("Connecting to Lobby:", WS_URL);
+    wsClient = new WebSocket(WS_URL);
+
+
+    wsClient.onopen = () => {
+        console.log("Connected to Custom Game Lobby");
+        // Only start broadcasting if we are the host
+        if (typeof isHost !== 'undefined' && isHost && !presenceInterval) {
+            presenceInterval = setInterval(publishPresence, 3000);
+        }
+    };
+
+
+    wsClient.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.op === 'presence') {
+                // Save server info and update timestamp
+                serverBrowserMap.set(data.id, { info: data, ts: Date.now() });
+                updateBrowserUI();
+            }
+        } catch(e) {
+            console.error("Invalid Lobby Data", e);
+        }
+    };
+    
+    wsClient.onerror = (err) => console.error("WS Error. Check your URL!", err);
+     
+    wsClient.onclose = () => {
+        console.log("Lobby connection lost. Retrying in 5s...");
+        if (presenceInterval) clearInterval(presenceInterval);
+        presenceInterval = null;
+        setTimeout(initServerBrowser, 5000);
+    };
+}
+
+
+function publishPresence() {
+    // dependency: check global variables exist before running
+    if (typeof gameMode === 'undefined' || gameMode === 'offline' || 
+        typeof isHost === 'undefined' || !isHost || 
+        !wsClient || wsClient.readyState !== 1 || 
+        typeof myPeerId === 'undefined' || !myPeerId) return;
+    
+    const nameInput = document.getElementById('server-name');
+    const name = nameInput ? nameInput.value : (typeof myName !== 'undefined' ? myName + "'s Server" : "Game Server");
+    
+    const privateCheck = document.getElementById('chk-server-private');
+    const isPrivate = privateCheck ? privateCheck.checked : false;
+    
+    if (isPrivate) return;
+
+
+    const packet = {
+        op: 'presence',
+        id: myPeerId,
+        name: name.substring(0, 20),
+        locked: !!serverPassword, // dependency: serverPassword global
+        host: typeof myName !== 'undefined' ? myName : "Host", 
+        players: (typeof clientConnections !== 'undefined') ? clientConnections.length + 1 : 1
+    };
+    
+    wsClient.send(JSON.stringify(packet));
+}
+
+
+function updateBrowserUI() {
+    if (typeof gameMode !== 'undefined' && gameMode === 'offline') return;
+    const list = document.getElementById('server-browser-list');
+    if (!list) return;
+
+
+    const now = Date.now();
+    let html = '';
+    let count = 0;
+
+
+    serverBrowserMap.forEach((val, id) => {
+        // Remove servers that haven't pinged in 10 seconds
+        if (now - val.ts > 10000) {
+            serverBrowserMap.delete(id);
+            return;
+        }
+        count++;
+        const s = val.info;
+        const lockIcon = s.locked ? '🔒' : '';
+        
+        // SECURITY FIX: Escape names to prevent hacking
+        const safeName = escapeHTML(s.name);
+        const safeHost = escapeHTML(s.host);
+        
+        html += `<div class="server-item" style="cursor:pointer; padding:10px; border-bottom:1px solid #444;" onclick="connectToServer('${s.id}', ${s.locked})">
+                     <div style="display:flex; justify-content:space-between;">
+                         <span><strong>${safeName}</strong> ${lockIcon}<br><small>by ${safeHost}</small></span>
+                         <span style="color:#4CAF50;">${s.players}/10</span>
+                     </div>
+                 </div>`;
+    });
+
+
+    list.innerHTML = count === 0 ? '<div style="padding:20px; color:#888; text-align:center;">No games found...</div>' : html;
+}
+
+
+function connectToServer(id, locked) {
+    let pass = '';
+    if (locked) {
+        pass = prompt("Enter Server Password:");
+        if (pass === null) return;
+    }
+    const remoteIdInput = document.getElementById('remote-id');
+    if (remoteIdInput) remoteIdInput.value = id;
+    
+    // dependency: joinGame must be defined globally
+    if (typeof joinGame === 'function') joinGame(pass);
+}
+
+
+
+
+
+
+        // --- CONFIG & GLOBALS ---
+        let myColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+        const CHEST_COLOR = 0xFFD700;
+        let studioAllowed = true;
+        let pvpAllowed = true;
+        
+        const CHUNK_SIZE = 50;
+        const activeChunks = new Map();
+        let floorTexture = null;
+        let chunkUpdateTimer = 0;
+        
+        let viewDistSetting = 2;
+        let maxModeStartTime = 0;
+        let serverPenaltyActive = false;
+        let serverPenaltyEnd = 0;
+        const PENALTY_DURATION = 5 * 60 * 1000;
+        const MAX_MODE_LIMIT = 5 * 60 * 1000;
+        
+        const COOLDOWNS = { sword: 600, bow: 600, hand: 300 };
+        let lastAttackTime = 0;
+        let gameUPS = 60;
+        let gameLoopInterval = null;
+        
+        const mobs = new Map();
+        const serverMobs = new Map();
+        let mobDifficulty = 'normal';
+        let nextMobSpawn = 0;
+        let mobDespawnTime = 0;
+        let mobsSpawned = false;
+        const MOB_SPAWN_INTERVAL = 15 * 60 * 1000;
+        const MOB_DESPAWN_DELAY = 7 * 60 * 1000;
+        
+        let peer = null;
+        let myPeerId = null;
+        let hostConnection = null;
+        let clientConnections = [];
+        let isHost = false;
+        let myName = "Player" + Math.floor(Math.random()*999);
+
+
+        const worldBlocks = new Map();
+        const otherPlayers = new Map();
+        const chestData = {};
+        const suspendedBlocks = new Map();
+        const projectiles = [];
+        let playerMesh = null;
+        let fpArm = null;
+        let fpWeapons = {};
+        let isStudioMode = false;
+        let isChestOpen = false;
+        let openChestPos = null;
+        let lastNetworkUpdate = 0;
+        let attackCooldown = 0;
+        let gameStarted = false;
+        
+        let lastInteractionTime = Date.now();
+        const IDLE_TIMEOUT = 10 * 60 * 1000;
+        
+        let viewMode = 1;
+        let isMenuOpen = true;
+        let isPaused = false;
+        let isMobile = false;
+        let touchControlsSetup = false;
+        let isLocked = false;
+        
+        let lastChatActivity = Date.now();
+        let chatEnabled = true;
+        let mutedPlayers = new Set();
+        let isServerMuted = false;
+
+
+        let scene, camera, renderer, raycaster, mouse;
+        let camYaw = 0, camPitch = 0;
+        const CAM_SENSITIVITY = 0.002;
+        
+        const player = {
+            x: 0, y: 15, z: 0,
+            vx: 0, vy: 0, vz: 0,
+            onGround: false, height: 1.8, width: 0.6,
+            speed: 10, runSpeed: 16, jump: 15, runJump: 18, walkTime: 0,
+            health: 100, maxHealth: 100,
+            armor: 0, maxArmor: 100,
+            shieldDurability: 0, maxShieldDurability: 100,
+            isBlocking: false,
+            isAiming: false,
+            equippedWeapon: null,
+            attackAnimTimer: 0,
+            inventory: { swords: 0, bows: 0, crossbows: 0, shields: 0, arrows: 0 },
+            blockInventory: {},
+            inWater: false,
+            oxygen: 100,
+            maxOxygen: 100
+        };
+
+
+        const HEALTH_REGEN_RATE_PER_SEC = 5;
+        const HEALTH_REGEN_DELAY_MS = 4500;
+        let lastHitTime = 0;
+        let lastKillerName = null;
+        
+        const keys = { w:false, a:false, s:false, d:false, space:false, shift:false, ctrl:false, click:false, shieldBtn:false };
+
+
+        function resetIdleTimer() { lastInteractionTime = Date.now(); }
+
+
+        function kickPlayer(reason = "KICKED FOR IDLE") {
+            if (peer) peer.destroy();
+            document.getElementById('kick-title').innerText = reason;
+            document.getElementById('kick-reason').innerText = getDisconnectMessage(reason);
+            document.getElementById('kick-screen').style.display = 'flex';
+            document.getElementById('ui-layer').style.display = 'none';
+            document.getElementById('canvas-container').style.display = 'none';
+            cancelAnimationFrame(animate);
+            if(gameLoopInterval) clearInterval(gameLoopInterval);
+        }
+
+
+        function getDisconnectMessage(reason) {
+            const messages = {
+                "KICKED FOR IDLE": "You were idle for too long",
+                "You have been kicked": "The host kicked you from the server",
+                "Server Error [1]": "A server error occurred",
+                "Bad Wifi [Error 2]": "Connection lost due to network issues",
+                "You left": "You left the server",
+                "Host closed the server": "The host shut down the server",
+                "Host disconnected": "The host lost connection"
+            };
+            return messages[reason] || "Disconnected from server";
+        }
+
+
+        function resetMenu() {
+            document.getElementById('host-section').style.display = 'none';
+            document.getElementById('join-section').style.display = 'none';
+            document.getElementById('main-menu-btns').style.display = 'block';
+            document.getElementById('btn-leave-game').style.display = 'none';
+            document.getElementById('btn-start-playing').style.display = 'block';
+            document.getElementById('btn-back-host').style.display = 'block';
+            document.getElementById('btn-close-server').style.display = 'none';
+            
+            if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
+        }
+
+
+        function toggleViewMode() {
+            viewMode = (viewMode + 1) % 3;
+            const btn = document.getElementById('btn-view-toggle');
+            if (viewMode === 0) btn.innerText = "View: First Person";
+            else if (viewMode === 1) btn.innerText = "View: Third Person";
+            else btn.innerText = "View: Second Person";
+        }
+
+
+        function updateViewDistance() {
+            const sel = document.getElementById('vision-dist-select');
+            viewDistSetting = parseInt(sel.value);
+            if (viewDistSetting >= 12) {
+                maxModeStartTime = Date.now();
+                showToast("Warning: MAX mode active");
+            } else {
+                maxModeStartTime = 0;
+            }
+            updateTerrainChunks();
+        }
+
+
+        function showHostSection() {
+            if (gameMode === 'offline') return;
+            
+            const n = document.getElementById('username').value || myName;
+            myName = n;
+            document.getElementById('main-menu-btns').style.display = 'none';
+            document.getElementById('host-section').style.display = 'block';
+            document.getElementById('btn-close-server').style.display = 'none';
+            document.getElementById('btn-start-playing').style.display = 'block';
+            document.getElementById('btn-back-host').style.display = 'block';
+            
+            initServerBrowser();
+            updateHostPlayerList();
+            if(!peer) initPeer(true);
+        }
+
+
+        function showJoinSection() {
+            if (gameMode === 'offline') return;
+            
+            const n = document.getElementById('username').value || myName;
+            myName = n;
+            document.getElementById('main-menu-btns').style.display = 'none';
+            document.getElementById('join-section').style.display = 'block';
+            
+            initServerBrowser();
+            updateBrowserUI();
+            
+            if(!peer) initPeer(false);
+        }
+        
+        function updateCloseButtons() {
+            const xBtn = document.getElementById('menu-close-x');
+            const mBtn = document.getElementById('menu-close-mobile');
+            if (gameStarted) {
+                xBtn.style.display = 'block';
+                mBtn.style.display = '';
+            } else {
+                xBtn.style.display = 'none';
+                mBtn.style.display = 'none';
+            }
+        }
+        
+        function updateHostPlayerList() {
+            if(!isHost) return;
+            const list = document.getElementById('host-player-list');
+            list.innerHTML = '';
+            if(clientConnections.length === 0) {
+                list.innerHTML = 'No other players';
+                return;
+            }
+            clientConnections.forEach(c => {
+                const p = otherPlayers.get(c.peer);
+                const name = p ? p.name : 'Unknown';
+                const div = document.createElement('div');
+                div.className = 'plist-item';
+                div.innerText = `${name} [${c.peer.substr(0,5)}...]`;
+                list.appendChild(div);
+            });
+        }
+        
+        function leaveGame() {
+            if (gameMode === 'offline') {
+                if(gameLoopInterval) clearInterval(gameLoopInterval);
+                document.getElementById('ui-layer').style.display = 'none';
+                document.getElementById('menu-overlay').classList.remove('hidden');
+                isMenuOpen = true;
+                gameStarted = false;
+                updateCloseButtons();
+                return;
+            }
+            
+            if (peer) {
+                if (!isHost && hostConnection) {
+                    hostConnection.send({ type: 'chat', name: 'SYSTEM', msg: `${myName} left the server.` });
+                }
+                peer.destroy();
+                peer = null;
+                myPeerId = null;
+                hostConnection = null;
+                clientConnections = [];
+                isHost = false;
+            }
+
+
+            if(gameLoopInterval) clearInterval(gameLoopInterval);
+            if(presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
+
+
+            document.getElementById('ui-layer').style.display = 'none';
+            document.getElementById('host-info-panel').style.display = 'none';
+            document.getElementById('menu-overlay').classList.remove('hidden');
+            document.getElementById('penalty-banner').style.display = 'none';
+            isMenuOpen = true;
+
+
+            if (playerMesh) { scene.remove(playerMesh); playerMesh = null; }
+            
+            otherPlayers.forEach(p => {
+                scene.remove(p.mesh);
+                if(p.indicator) p.indicator.remove();
+            });
+            otherPlayers.clear();
+            
+            mobs.forEach(m => { scene.remove(m.mesh); if(m.indicator) m.indicator.remove(); });
+            mobs.clear();
+            serverMobs.clear();
+            
+            worldBlocks.forEach(mesh => {
+                scene.remove(mesh);
+                mesh.geometry.dispose();
+                if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(m => m.dispose());
+                } else {
+                    mesh.material.dispose();
+                }
+            });
+            worldBlocks.clear();
+            suspendedBlocks.clear();
+            
+            projectiles.forEach(p => scene.remove(p.mesh));
+            projectiles.length = 0;
+
+
+            activeChunks.forEach(mesh => {
+                scene.remove(mesh);
+                mesh.geometry.dispose();
+            });
+            activeChunks.clear();
+
+
+            if(scene) scene.background = new THREE.Color(0x000000);
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+
+
+            player.health = player.maxHealth;
+            player.armor = 0;
+            player.shieldDurability = 0;
+            player.inventory = { swords: 0, bows: 0, crossbows: 0, shields: 0, arrows: 0 };
+            player.blockInventory = {};
+            player.equippedWeapon = null;
+            serverPassword = "";
+            
+            serverPenaltyActive = false;
+            document.getElementById('vision-dist-select').disabled = false;
+            
+            gameStarted = false;
+            updateCloseButtons();
+            updateStatsUI();
+            updateEquipmentUI();
+            updateInventoryUI();
+            resetMenu();
+            document.getElementById('btn-leave-game').style.display = 'none';
+            showToast("You left");
+        }
+
+
+        function closeServer() {
+            if (!isHost) return leaveGame();
+            broadcast({ type: 'chat', msg: 'Host closed the server.' }, null, true);
+            clientConnections.forEach(conn => { if (conn.open) conn.close(); });
+            clientConnections = [];
+            leaveGame();
+            showToast("Server closed.");
+        }
+
+
+        function toggleStudioPermission() {
+            if(!isHost) return;
+            studioAllowed = document.getElementById('chk-allow-studio').checked;
+            sendPacket({ type: 'config', studioAllowed: studioAllowed, pvpAllowed: pvpAllowed });
+            if(!studioAllowed && isStudioMode) toggleStudioMode(false);
+            showToast(studioAllowed ? "Studio Mode Enabled" : "Studio Mode Disabled");
+        }
+
+
+        function togglePvPPermission() {
+            if(!isHost) return;
+            pvpAllowed = document.getElementById('chk-allow-pvp').checked;
+            sendPacket({ type: 'config', studioAllowed: studioAllowed, pvpAllowed: pvpAllowed });
+            showToast(pvpAllowed ? "PvP Enabled" : "PvP Disabled");
+        }
+
+
+        // --- PAUSE MENU ---
+        function openPauseMenu() {
+            if (!gameStarted) return;
+            isPaused = true;
+            document.getElementById('pause-menu').style.display = 'flex';
+            document.exitPointerLock();
+            
+            const buttonsContainer = document.getElementById('pause-menu-buttons');
+            buttonsContainer.innerHTML = '';
+            
+            if (isHost) {
+                addPauseButton('Player List', showPlayerList);
+                addPauseButton('Command Help', showHostCommands);
+                addPauseButton('Options', showHostOptions);
+                addPauseButton('Close Menu', closePauseMenu);
+                addPauseButton('Close Server', closeServer);
+            } else if (gameMode === 'online') {
+                addPauseButton('Command Help', showClientCommands);
+                addPauseButton('Options', showClientOptions);
+                addPauseButton('Leave Server', leaveGame);
+                addPauseButton('Close Menu', closePauseMenu);
+            } else {
+                addPauseButton('Save and Exit', saveAndExit);
+                addPauseButton('Options', showOfflineOptions);
+                addPauseButton('Close Menu', closePauseMenu);
+            }
+        }
+
+
+        function closePauseMenu() {
+            isPaused = false;
+            document.getElementById('pause-menu').style.display = 'none';
+            if (!isMobile && !isChestOpen) renderer.domElement.requestPointerLock();
+        }
+
+
+        function addPauseButton(text, onClick) {
+            const btn = document.createElement('div');
+            btn.className = 'pause-btn';
+            btn.textContent = text;
+            btn.onclick = onClick;
+            document.getElementById('pause-menu-buttons').appendChild(btn);
+        }
+
+
+        function showPlayerList() {
+            let list = '<div style="color:white;padding:20px;"><h3>Connected Players</h3>';
+            list += `<p>• ${myName} (You - Host)</p>`;
+            clientConnections.forEach(conn => {
+                const p = otherPlayers.get(conn.peer);
+                if (p) list += `<p>• ${p.name}</p>`;
+            });
+            list += '</div>';
+            
+            const container = document.getElementById('pause-menu-buttons');
+            container.innerHTML = list;
+            addPauseButton('Back', openPauseMenu);
+        }
+
+
+        function showHostCommands() {
+            const cmds = `
+                <div style="color:white;padding:20px;text-align:left;font-size:11px;">
+                    <h3>Host Commands</h3>
+                    <p><b>/give</b> - Give yourself full inventory</p>
+                    <p><b>/spawn mobs [count]</b> - Spawn enemies</p>
+                    <p><b>/destroy mobs</b> - Remove all enemies</p>
+                    <p><b>/destroy [player]</b> - Eliminate player</p>
+                    <p><b>/tp all</b> - Teleport all to you</p>
+                    <p><b>/tp [p1] to [p2]</b> - Teleport player</p>
+                    <p><b>/kick [player]</b> - Kick player</p>
+                    <p><b>/mute [player]</b> - Mute player</p>
+                    <p><b>/unmute [player]</b> - Unmute player</p>
+                </div>
+            `;
+            document.getElementById('pause-menu-buttons').innerHTML = cmds;
+            addPauseButton('Back', openPauseMenu);
+        }
+
+
+        function showClientCommands() {
+            const cmds = `
+                <div style="color:white;padding:20px;text-align:left;font-size:11px;">
+                    <h3>Available Commands</h3>
+                   <p><b>/change username to [name]</b> - Change your name</p>
+                    <p><b>/chat off</b> - Disable chat</p>
+                </div>
+            `;
+            document.getElementById('pause-menu-buttons').innerHTML = cmds;
+            addPauseButton('Back', openPauseMenu);
+        }
+
+
+        function showHostOptions() {
+            const opts = `
+                <div style="color:white;padding:20px;">
+                    <h3>Server Options</h3>
+                    <div class="checkbox-row" style="justify-content:center;">
+                        <input type="checkbox" id="pause-pvp" ${pvpAllowed?'checked':''} onchange="togglePvPPermission()">
+                        <span>Allow PvP</span>
+                    </div>
+                    <div class="checkbox-row" style="justify-content:center;">
+                        <input type="checkbox" id="pause-studio" ${studioAllowed?'checked':''} onchange="toggleStudioPermission()">
+                        <span>Allow Studio Mode</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('pause-menu-buttons').innerHTML = opts;
+            addPauseButton('Back', openPauseMenu);
+        }
+
+
+        function showClientOptions() {
+            const opts = `
+                <div style="color:white;padding:20px;">
+                    <h3>Options</h3>
+                    <div class="checkbox-row" style="justify-content:center;">
+                        <input type="checkbox" id="pause-client-pvp" ${pvpAllowed?'checked':''} disabled>
+                        <span>PvP ${pvpAllowed?'(Enabled by Host)':'(Disabled by Host)'}</span>
+                    </div>
+                    <div class="checkbox-row" style="justify-content:center;">
+                        <input type="checkbox" id="pause-client-studio" ${studioAllowed?'checked':''} disabled>
+                        <span>Studio ${studioAllowed?'(Enabled by Host)':'(Disabled by Host)'}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('pause-menu-buttons').innerHTML = opts;
+            addPauseButton('Back', openPauseMenu);
+        }
+
+
+        function showOfflineOptions() {
+            const opts = `
+                <div style="color:white;padding:20px;">
+                    <h3>Options</h3>
+                    <p>There are no settings to configure in this mode</p>
+                </div>
+            `;
+            document.getElementById('pause-menu-buttons').innerHTML = opts;
+            addPauseButton('Back', openPauseMenu);
+        }
+
+
+        function saveAndExit() {
+            saveOfflineWorld();
+            leaveGame();
+            closePauseMenu();
+        }
+
+
+        // --- NETWORKING ---
+        function initPeer(asHost) {
+            if (gameMode === 'offline') return;
+            
+            peer = new Peer();
+            peer.on('open', (id) => {
+                myPeerId = id;
+                if(asHost) {
+                    document.getElementById('host-id-display').style.display = 'block';
+                    document.getElementById('host-id-display').innerText = id;
+                    document.getElementById('ingame-host-id').innerText = id;
+                }
+            });
+
+
+            peer.on('connection', (conn) => {
+                if(isHost) {
+                    const pass = conn.metadata ? conn.metadata.password : '';
+                    if (serverPassword && pass !== serverPassword) {
+                        conn.on('open', () => {
+                             conn.send({ type: 'kick', reason: 'Wrong Password' });
+                             setTimeout(() => conn.close(), 500);
+                        });
+                        return;
+                    }
+
+
+                    clientConnections.push(conn);
+                    setupConnection(conn);
+                    conn.on('open', () => {
+                        const blockList = [];
+                        worldBlocks.forEach((mesh, key) => {
+                            const [x,y,z] = key.split('_').map(Number);
+                            const blockType = mesh.userData.blockType || 0;
+                            blockList.push({x,y,z, type: blockType});
+                        });
+                        
+                        if(serverPenaltyActive) conn.send({ type: 'penalty_start', endTime: serverPenaltyEnd });
+                        conn.send({ 
+                            type: 'init_world', 
+                            blocks: blockList, 
+                            studioAllowed: studioAllowed, 
+                            pvpAllowed: pvpAllowed,
+                            dimension: gameDimension 
+                        });
+                        broadcast({ type: 'chat', msg: 'A player joined!' }, null, true);
+                        updateHostPlayerList();
+                    });
+                }
+            });
+            peer.on('error', (err) => { console.error(err); showToast("Connection Error"); });
+        }
+
+
+        function startHostGame() {
+            if (gameMode === 'offline') return;
+            
+            isHost = true;
+            isMenuOpen = false;
+            studioAllowed = document.getElementById('chk-allow-studio').checked;
+            pvpAllowed = document.getElementById('chk-allow-pvp').checked;
+            serverPassword = document.getElementById('server-password').value;
+            mobDifficulty = 'normal';
+            
+            let ups = parseInt(document.getElementById('ups-input').value) || 60;
+            if(ups < 10) ups = 10; if(ups > 120) ups = 120;
+            gameUPS = ups;
+
+
+            document.getElementById('main-menu-btns').style.display = 'none';
+            document.getElementById('btn-start-playing').style.display = 'none';
+            document.getElementById('btn-back-host').style.display = 'none';
+            document.getElementById('btn-close-server').style.display = 'block';
+            
+            document.getElementById('menu-overlay').classList.add('hidden');
+            document.getElementById('ui-layer').style.display = 'flex';
+            document.getElementById('host-info-panel').style.display = 'flex';
+            
+            gameStarted = true;
+            updateCloseButtons();
+            nextMobSpawn = Date.now() + MOB_SPAWN_INTERVAL;
+
+
+            publishPresence();
+            presenceInterval = setInterval(publishPresence, 4000);
+
+
+            startGame();
+            if(!isMobile) renderer.domElement.requestPointerLock();
+        }
+
+
+        function joinGame(password = '') {
+            if (gameMode === 'offline') return;
+            
+            const hostId = document.getElementById('remote-id').value.trim();
+            let ups = parseInt(document.getElementById('ups-input').value) || 60;
+            if(ups < 10) ups = 10; if(ups > 120) ups = 120;
+            gameUPS = ups;
+            
+            if(!hostId) return;
+            document.getElementById('loading-msg').style.display = 'block';
+            
+            hostConnection = peer.connect(hostId, { metadata: { password: password } });
+            
+            hostConnection.on('open', () => {
+                isMenuOpen = false;
+                document.getElementById('menu-overlay').classList.add('hidden');
+                document.getElementById('ui-layer').style.display = 'flex';
+                
+                gameStarted = true;
+                updateCloseButtons();
+                
+                startGame();
+                setupConnection(hostConnection);
+                addChatBubble("SYSTEM", "Connected to Host!", true);
+                if(!isMobile) renderer.domElement.requestPointerLock();
+                document.getElementById('btn-leave-game').style.display = 'block';
+            });
+            
+            hostConnection.on('error', (err) => {
+                showToast("Could not connect.");
+                document.getElementById('loading-msg').style.display = 'none';
+                resetMenu();
+            });
+            hostConnection.on('close', () => { 
+                kickPlayer("Host disconnected"); 
+            });
+        }
+
+
+        function setupConnection(conn) {
+            conn.on('data', (data) => {
+                if(isHost) {
+                    if(data.type === 'block') { handleBlockPacket(data); broadcast(data, conn); }
+                    else if(data.type === 'chat') {
+                        if (isServerMuted) return;
+                        if (mutedPlayers.has(data.name)) return;
+                        
+                        addChatBubble(data.name, data.msg);
+                        broadcast(data, conn);
+                    }
+                    else if(data.type === 'move') { handleMovePacket(data); broadcast(data, conn); }
+                    else if(data.type === 'trigger_penalty') { activateServerPenalty(); broadcast({ type: 'penalty_start', endTime: serverPenaltyEnd }); }
+                    else if(data.type === 'attack') {
+                        if(data.targetId === myPeerId) takeDamage(data.weapon, data.attackerName);
+                        else {
+                            const targetConn = clientConnections.find(c => c.peer === data.targetId);
+                            if(targetConn) targetConn.send(data);
+                        }
+                        broadcast(data, conn);
+                    } else if(data.type === 'death_report') {
+                        const deathData = { type: 'death_message', victimName: otherPlayers.get(conn.peer)?.name || 'Player', reason: data.reason, killerName: data.killerName };
+                        broadcast(deathData, conn, false);
+                        handleDeathMessage(deathData);
+                    }
+                } else {
+                    if(data.type === 'move') handleMovePacket(data);
+                    if(data.type === 'block') handleBlockPacket(data);
+                    if(data.type === 'chat') addChatBubble(data.name, data.msg, data.name === 'SYSTEM');
+                    if(data.type === 'config') { studioAllowed = data.studioAllowed; pvpAllowed = data.pvpAllowed; checkStudioConstraint(); }
+                    if(data.type === 'attack') handleAttackPacket(data);
+                    if(data.type === 'death_message') handleDeathMessage(data);
+                    if(data.type === 'penalty_start') { serverPenaltyEnd = data.endTime; activateServerPenalty(true); }
+                    if(data.type === 'mob_update') handleMobUpdate(data);
+                    if(data.type === 'mob_remove') handleMobRemove(data.mobId);
+                    if(data.type === 'mob_clear') {
+                        mobs.forEach(m => { scene.remove(m.mesh); if(m.indicator) m.indicator.remove(); });
+                        mobs.clear();
+                    }
+                    if(data.type === 'teleport') { player.x = data.x; player.y = data.y; player.z = data.z; showToast("Teleported by Host"); }
+                    if(data.type === 'kick') { kickPlayer(data.reason || "You have been kicked"); }
+                    if(data.type === 'init_world') {
+                        data.blocks.forEach(b => createBlock(b.x, b.y, b.z, b.type));
+                        studioAllowed = data.studioAllowed !== undefined ? data.studioAllowed : true;
+                        pvpAllowed = data.pvpAllowed !== undefined ? data.pvpAllowed : true;
+                        if (data.dimension) gameDimension = data.dimension;
+                    }
+                }
+            });
+            conn.on('close', () => {
+                if(isHost) {
+                    clientConnections = clientConnections.filter(c => c !== conn);
+                    if(otherPlayers.has(conn.peer)) {
+                        const p = otherPlayers.get(conn.peer);
+                        scene.remove(p.mesh); if(p.indicator) p.indicator.remove();
+                        otherPlayers.delete(conn.peer);
+                        broadcast({ type: 'chat', msg: `A player disconnected.` }, null, true);
+                        updateHostPlayerList();
+                    }
+                } else { 
+                    kickPlayer("Host closed the server"); 
+                }
+            });
+        }
+
+
+        function activateServerPenalty(isClientRecv = false) {
+            if(!isClientRecv) serverPenaltyEnd = Date.now() + PENALTY_DURATION;
+            serverPenaltyActive = true;
+            const sel = document.getElementById('vision-dist-select');
+            sel.value = "1"; sel.disabled = true;
+            viewDistSetting = 1; maxModeStartTime = 0;
+            document.getElementById('penalty-banner').style.display = 'block';
+            showToast("SERVER RECOVERY MODE ACTIVATED");
+            updateTerrainChunks();
+        }
+
+
+        function checkPenaltyStatus() {
+            if(!serverPenaltyActive) return;
+            const remaining = serverPenaltyEnd - Date.now();
+            if(remaining <= 0) {
+                serverPenaltyActive = false;
+                document.getElementById('penalty-banner').style.display = 'none';
+                document.getElementById('vision-dist-select').disabled = false;
+                showToast("Server Recovery Complete");
+            } else {
+                const m = Math.floor(remaining / 60000);
+                const s = Math.floor((remaining % 60000) / 1000);
+                document.getElementById('penalty-timer').innerText = `${m}:${s<10?'0':''}${s}`;
+            }
+        }
+
+
+        function broadcast(data, excludeConn = null, isSystemMessage = false) {
+            if (gameMode === 'offline') return;
+            if(!isHost) return;
+            if(isSystemMessage) data.name = 'SYSTEM';
+            clientConnections.forEach(conn => { if(conn !== excludeConn && conn.open) conn.send(data); });
+            if(isSystemMessage && data.msg) addChatBubble(data.name, data.msg, true);
+        }
+
+
+        function sendPacket(data) {
+            if (gameMode === 'offline') return;
+            if(isHost) broadcast(data);
+            else if(hostConnection) hostConnection.send(data);
+        }
+
+
+        function handleMovePacket(data) {
+            if(data.id === myPeerId) return;
+            let p = otherPlayers.get(data.id);
+            if(!p) {
+                const mesh = createCharacterRig(data.color || '#fff');
+                scene.add(mesh);
+                if(data.name) mesh.add(createNameLabel(data.name));
+                
+                const ind = createHUDIndicator(data.name);
+                p = { mesh: mesh, target: new THREE.Vector3(data.x, data.y, data.z), attackAnim: 0, yaw: data.yaw || 0, name: data.name, indicator: ind, health: 100 };
+                otherPlayers.set(data.id, p);
+                updateHostPlayerList();
+            }
+            
+            p.target.set(data.x, data.y, data.z);
+            p.yaw = data.yaw || 0;
+            
+            if (p.name !== data.name) {
+                p.name = data.name;
+                if(p.indicator) {
+                    const titleDiv = p.indicator.children[0];
+                    if(titleDiv) titleDiv.innerHTML = `${p.name} <span class="dist-text"></span>`;
+                }
+                const oldSprite = p.mesh.children.find(c => c.isSprite);
+                if(oldSprite) p.mesh.remove(oldSprite);
+                p.mesh.add(createNameLabel(p.name));
+            }
+
+
+            p.equippedWeapon = data.weapon;
+            p.isBlocking = data.blocking;
+            p.health = data.hp;
+            
+            if(p.indicator) {
+                const bar = p.indicator.querySelector('.indicator-health-bar');
+                if(bar) bar.style.width = Math.max(0, p.health) + '%';
+            }
+
+
+            if(data.attacking) p.attackAnim = 1.0;
+            updateCharacterWeapons(p.mesh, p.equippedWeapon, p.isBlocking);
+        }
+
+
+        function createHUDIndicator(name) {
+            const ind = document.createElement('div');
+            ind.className = 'player-indicator';
+            ind.innerHTML = `<div>${name} <span class="dist-text"></span></div><div class="indicator-health"><div class="indicator-health-bar"></div></div>`;
+            document.getElementById('indicators-container').appendChild(ind);
+            return ind;
+        }
+
+
+        function handleAttackPacket(data) {
+            if(data.targetId === myPeerId) takeDamage(data.weapon, data.attackerName);
+        }
+
+
+        function handleBlockPacket(data) {
+            if(data.action === 1) createBlock(data.x, data.y, data.z, data.type);
+            else removeBlock(`${data.x}_${data.y}_${data.z}`);
+        }
+        
+        function handleDeathMessage(data) {
+            let msg = '';
+            if (data.reason === 'pvp') msg = `<span style="color:#FF6666; font-weight:bold;">${data.victimName} was slain by ${data.killerName}!</span>`;
+            else if (data.reason === 'void') msg = `<span style="color:#FFA500; font-weight:bold;">${data.victimName} fell off the map!</span>`;
+            else if (data.reason === 'mob') msg = `<span style="color:#FF6666; font-weight:bold;">${data.victimName} was killed by a ${data.killerName}!</span>`;
+            else if (data.reason === 'drowned') msg = `<span style="color:#00BFFF; font-weight:bold;">${data.victimName} drowned!</span>`;
+            addChatBubble("SYSTEM", msg, true);
+        }
+
+
+        // --- MOBS ---
+        function handleMobUpdate(data) {
+            data.mobs.forEach(m => {
+                let mob = mobs.get(m.id);
+                if(!mob) {
+                    const color = m.type === 'zombie' ? 0x00aa00 : (m.type === 'skeleton' ? 0xdddddd : 0x00ff00);
+                    const geo = m.type === 'creeper' ? new THREE.CylinderGeometry(0.3, 0.3, 1.6) : new THREE.BoxGeometry(0.6, 1.8, 0.4);
+                    const mat = new THREE.MeshStandardMaterial({color: color});
+                    const mesh = new THREE.Mesh(geo, mat);
+                    scene.add(mesh);
+                    
+                    const ind = createHUDIndicator(m.type.toUpperCase());
+                    
+                    mob = { mesh: mesh, indicator: ind };
+                    mobs.set(m.id, mob);
+                }
+                mob.mesh.position.set(m.x, m.y, m.z);
+                mob.mesh.rotation.y = m.yaw;
+                if(mob.indicator) {
+                    const bar = mob.indicator.querySelector('.indicator-health-bar');
+                    if(bar) bar.style.width = (m.hp) + '%';
+                }
+            });
+        }
+
+
+        function handleMobRemove(id) {
+            if(mobs.has(id)) {
+                const m = mobs.get(id);
+                scene.remove(m.mesh);
+                if(m.indicator) m.indicator.remove();
+                mobs.delete(id);
+            }
+        }
+
+
+        // --- COMBAT ---
+        function takeDamage(weaponType, attackerName = null) {
+            if(isStudioMode) return;
+            
+            let dmg = 20;
+            if (weaponType === 'sword') dmg = 50;
+            else if (weaponType === 'arrow') dmg = 40;
+            else if (weaponType === 'creeper') dmg = 70;
+            else if (weaponType === 'admin') dmg = 9999;
+            else if (weaponType === 'void') dmg = 100;
+            else if (weaponType === 'drown') dmg = 10;
+
+
+            if (player.armor > 0 && weaponType !== 'admin' && weaponType !== 'void' && weaponType !== 'drown') {
+                dmg = weaponType === 'sword' ? 20 : (weaponType === 'arrow' ? 10 : 5);
+                if(weaponType === 'creeper') dmg = 30;
+                player.armor -= 4;
+                if (player.armor <= 0) { player.armor = 0; showToast("ARMOR BROKEN!"); }
+            }
+
+
+            if (player.isBlocking && player.inventory.shields > 0 && weaponType !== 'admin' && weaponType !== 'void' && weaponType !== 'drown') {
+                dmg = Math.floor(dmg * 0.8);
+                player.shieldDurability -= 10;
+                if(player.shieldDurability <= 0) {
+                    player.shieldDurability = 0; player.inventory.shields = 0;
+                    player.isBlocking = false; showToast("SHIELD BROKEN!");
+                    updateEquipmentUI(); updateShieldVisuals();
+                }
+            }
+
+
+            player.health -= dmg;
+            lastHitTime = Date.now();
+            if (attackerName) lastKillerName = attackerName;
+
+
+            updateStatsUI();
+            
+            const hurt = document.getElementById('hurt-overlay');
+            hurt.style.opacity = 1;
+            setTimeout(() => hurt.style.opacity = 0, 200);
+            showToast(`Hit by ${weaponType || 'hand'}! -${dmg} HP`);
+            
+            if(player.health <= 0) {
+                player.health = player.maxHealth;
+                player.armor = 0; player.shieldDurability = 0; player.inventory.shields = 0;
+                updateStatsUI(); updateEquipmentUI();
+                addChatBubble("SYSTEM", "You died!", true);
+                
+                let reason = 'void';
+                let killer = 'Unknown';
+                
+                if (weaponType === 'creeper') { reason = 'mob'; killer = 'Creeper'; }
+                else if (weaponType === 'drown') { reason = 'drowned'; killer = 'The Ocean'; }
+                else if (lastKillerName) { reason = 'pvp'; killer = lastKillerName; }
+
+
+                if (isHost || gameMode === 'offline') {
+                    const deathData = { type: 'death_message', victimName: myName, reason: reason, killerName: killer };
+                    if (gameMode === 'online') {
+                        broadcast(deathData, null, false);
+                    }
+                    handleDeathMessage(deathData);
+                } else {
+                    sendPacket({ type: 'death_report', killerName: killer, reason: reason });
+                }
+                respawnPlayer();
+                lastKillerName = null;
+            }
+        }
+
+
+        function updateStatsUI() {
+            const hPct = Math.max(0, (player.health / player.maxHealth) * 100);
+            document.getElementById('health-fill').style.width = hPct + "%";
+            document.getElementById('health-text').innerText = "HP: " + Math.ceil(player.health);
+            
+            const aPct = Math.max(0, (player.armor / player.maxArmor) * 100);
+            document.getElementById('armor-fill').style.width = aPct + "%";
+            document.getElementById('armor-text').innerText = "Armor: " + Math.ceil(player.armor);
+
+
+            const sPct = Math.max(0, (player.shieldDurability / player.maxShieldDurability) * 100);
+            document.getElementById('shield-fill').style.width = sPct + "%";
+            document.getElementById('shield-text').innerText = "Shield: " + Math.ceil(player.shieldDurability);
+            
+            document.getElementById('bar-shield-wrap').style.display = (player.inventory.shields > 0) ? 'block' : 'none';
+
+
+            const oPct = Math.max(0, (player.oxygen / player.maxOxygen) * 100);
+            document.getElementById('oxygen-fill').style.width = oPct + "%";
+            document.getElementById('oxygen-text').innerText = "Oxygen: " + Math.ceil(player.oxygen);
+            
+            document.getElementById('bar-oxygen-wrap').style.display = (player.inWater && gameDimension === '3d') ? 'block' : 'none';
+            
+            const btnShield = document.getElementById('btn-shield');
+            if(isMobile && player.inventory.shields > 0) btnShield.style.display = 'flex';
+            else btnShield.style.display = 'none';
+        }
+
+
+        function equipWeapon(type) {
+            resetIdleTimer();
+            if (player.equippedWeapon === type) {
+                player.equippedWeapon = null; showToast("Unequipped");
+            } else {
+                player.equippedWeapon = type; showToast("Equipped: " + type.toUpperCase());
+            }
+            updateEquipmentUI();
+        }
+
+
+        function updateEquipmentUI() {
+            document.getElementById('icon-sword').classList.toggle('visible', player.inventory.swords > 0);
+            document.getElementById('icon-bow').classList.toggle('visible', player.inventory.bows > 0 || player.inventory.crossbows > 0);
+            
+            document.getElementById('icon-sword').classList.toggle('selected', player.equippedWeapon === 'sword');
+            document.getElementById('icon-bow').classList.toggle('selected', player.equippedWeapon === 'bow');
+            
+            const arrowEl = document.getElementById('icon-arrow');
+            if (player.inventory.bows > 0 || player.inventory.crossbows > 0) {
+                arrowEl.classList.add('visible'); arrowEl.innerText = `➵ ${player.inventory.arrows}`;
+            } else { arrowEl.classList.remove('visible'); }
+
+
+            if (fpWeapons.sword) fpWeapons.sword.visible = (player.equippedWeapon === 'sword');
+            if (fpWeapons.bow) fpWeapons.bow.visible = (player.equippedWeapon === 'bow');
+            
+            updateStatsUI();
+        }
+
+
+        function updateInventoryUI() {
+            const invList = document.getElementById('inventory-list');
+            invList.innerHTML = '';
+
+
+            // Combat items
+            if (player.inventory.swords > 0) {
+                invList.innerHTML += `<div class="inv-item"><span class="inv-item-name">⚔️ Sword</span><span class="inv-item-count">${player.inventory.swords}</span></div>`;
+            }
+            if (player.inventory.bows > 0) {
+                invList.innerHTML += `<div class="inv-item"><span class="inv-item-name">🏹 Bow</span><span class="inv-item-count">${player.inventory.bows}</span></div>`;
+            }
+            if (player.inventory.arrows > 0) {
+                invList.innerHTML += `<div class="inv-item"><span class="inv-item-name">➵ Arrows</span><span class="inv-item-count">${player.inventory.arrows}</span></div>`;
+            }
+            if (player.inventory.shields > 0) {
+                invList.innerHTML += `<div class="inv-item"><span class="inv-item-name">🛡️ Shield</span><span class="inv-item-count">${player.inventory.shields}</span></div>`;
+            }
+
+
+            // Block items
+            Object.keys(player.blockInventory).forEach(blockId => {
+                const count = player.blockInventory[blockId];
+                if (count > 0) {
+                    const blockType = BLOCK_ID_TO_TYPE[blockId];
+                    if (blockType) {
+                        invList.innerHTML += `<div class="inv-item"><span class="inv-item-name">🧱 ${blockType.name}</span><span class="inv-item-count">${count}</span></div>`;
+                    }
+                }
+            });
+
+
+            if (invList.innerHTML === '') {
+                invList.innerHTML = '<div style="color:#888; font-size:11px; text-align:center; padding:10px;">Empty</div>';
+            }
+        }
+        
+        function updateShieldVisuals() {
+            if(fpWeapons.shield) fpWeapons.shield.visible = player.isBlocking && player.inventory.shields > 0;
+            const btn = document.getElementById('btn-shield');
+            if(player.isBlocking) btn.classList.add('active'); else btn.classList.remove('active');
+            if(playerMesh) updateCharacterWeapons(playerMesh, player.equippedWeapon, player.isBlocking);
+        }
+
+
+        function updateCharacterWeapons(rig, weaponType, isBlocking) {
+            if(!rig.userData) return;
+            const w = rig.userData.weapons;
+            if(w) {
+                w.sword.visible = (weaponType === 'sword');
+                w.bow.visible = (weaponType === 'bow');
+                w.shield.visible = (isBlocking === true);
+            }
+        }
+
+
+        function checkStudioConstraint() {
+            if(!studioAllowed && isStudioMode) {
+                toggleStudioMode(false); showToast("Host disabled Studio Mode");
+            }
+        }
+
+
+        function createFloorTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 64, 64);
+            gradient.addColorStop(0, '#4CAF50');
+            gradient.addColorStop(0.5, '#45a049');
+            gradient.addColorStop(1, '#3d8b40');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 64, 64);
+            
+            ctx.strokeStyle = '#2e7d32';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 10; i++) {
+                const x = Math.random() * 64;
+                const y = Math.random() * 64;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + 2, y - 5);
+                ctx.stroke();
+            }
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
+            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(CHUNK_SIZE, CHUNK_SIZE);
+            return tex;
+        }
+
+
+        function createBlockTexture(blockType) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = blockType.color;
+            ctx.fillRect(0, 0, 64, 64);
+            
+            // Add texture details based on block type
+            if (blockType.id === BLOCK_TYPES.STONE.id || blockType.id === BLOCK_TYPES.COBBLESTONE.id) {
+                // Stone/Cobblestone texture
+                for (let i = 0; i < 30; i++) {
+                    ctx.fillStyle = `rgba(${Math.random() * 50}, ${Math.random() * 50}, ${Math.random() * 50}, 0.3)`;
+                    ctx.fillRect(Math.random() * 64, Math.random() * 64, Math.random() * 8, Math.random() * 8);
+                }
+            } else if (blockType.id === BLOCK_TYPES.DIRT.id) {
+                // Dirt texture
+                for (let i = 0; i < 40; i++) {
+                    ctx.fillStyle = `rgba(${100 + Math.random() * 40}, ${50 + Math.random() * 20}, ${20 + Math.random() * 10}, 0.4)`;
+                    ctx.fillRect(Math.random() * 64, Math.random() * 64, 2 + Math.random() * 4, 2 + Math.random() * 4);
+                }
+            } else if (blockType.id === BLOCK_TYPES.GRASS.id) {
+                // Grass texture (green with some variation)
+                for (let i = 0; i < 20; i++) {
+                    ctx.strokeStyle = `rgba(${20 + Math.random() * 30}, ${120 + Math.random() * 50}, ${20 + Math.random() * 30}, 0.6)`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    const x = Math.random() * 64;
+                    const y = Math.random() * 64;
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + 1, y - 3);
+                    ctx.stroke();
+                }
+            } else if (blockType.id === BLOCK_TYPES.WOOD.id) {
+                // Wood texture (vertical lines)
+                for (let i = 0; i < 8; i++) {
+                    ctx.strokeStyle = `rgba(${100 + Math.random() * 40}, ${60 + Math.random() * 20}, ${20 + Math.random() * 10}, 0.5)`;
+                    ctx.lineWidth = 2 + Math.random() * 3;
+                    ctx.beginPath();
+                    const x = i * 8 + Math.random() * 4;
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, 64);
+                    ctx.stroke();
+                }
+            } else if (blockType.id === BLOCK_TYPES.BRICK.id) {
+                // Brick pattern
+                ctx.strokeStyle = '#8B0000';
+                ctx.lineWidth = 2;
+                for (let y = 0; y < 64; y += 16) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(64, y);
+                    ctx.stroke();
+                    
+                    for (let x = (y % 32 === 0 ? 0 : 16); x < 64; x += 32) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x, y + 16);
+                        ctx.stroke();
+                    }
+                }
+            } else if (blockType.id === BLOCK_TYPES.SAND.id) {
+                // Sand texture (grainy)
+                for (let i = 0; i < 100; i++) {
+                    ctx.fillStyle = `rgba(${200 + Math.random() * 55}, ${150 + Math.random() * 50}, ${80 + Math.random() * 40}, 0.3)`;
+                    ctx.fillRect(Math.random() * 64, Math.random() * 64, 1, 1);
+                }
+            }
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.magFilter = THREE.NearestFilter;
+            tex.minFilter = THREE.NearestFilter;
+            return tex;
+        }
+
+
+        function updateBlockAppearance(mesh, blockTypeId) {
+            const blockType = BLOCK_ID_TO_TYPE[blockTypeId] || BLOCK_TYPES.STONE;
+            
+            if (texturesEnabled) {
+                if (!blockType.texture) {
+                    blockType.texture = createBlockTexture(blockType);
+                }
+                
+                if (blockType.transparent) {
+                    mesh.material = new THREE.MeshStandardMaterial({ 
+                        map: blockType.texture, 
+                        transparent: true, 
+                        opacity: 0.7,
+                        side: THREE.DoubleSide
+                    });
+                } else {
+                    mesh.material = new THREE.MeshStandardMaterial({ map: blockType.texture });
+                }
+            } else {
+                if (blockType.transparent) {
+                    mesh.material = new THREE.MeshStandardMaterial({ 
+                        color: blockType.color, 
+                        transparent: true, 
+                        opacity: 0.7,
+                        side: THREE.DoubleSide
+                    });
+                } else {
+                    mesh.material = new THREE.MeshStandardMaterial({ color: blockType.color });
+                }
+            }
+        }
+
+
+        function spawnChestAt(x, y, z) {
+            const key = `${x}_${y}_${z}`;
+            if (chestData[key]) return;
+            createBlock(x, y, z, -1); // Special chest block
+            chestData[key] = [
+                { type: 'Armor', count: 3 }, { type: 'Sword', count: 3 },
+                { type: 'Arrows', count: 300 }, { type: 'Shield', count: 6 }, { type: 'Bow', count: 3 }
+            ];
+
+
+            // Add blocks to chest in 3D mode
+            if (gameDimension === '3d') {
+                Object.keys(BLOCK_TYPES).forEach(key => {
+                    const blockType = BLOCK_TYPES[key];
+                    if (blockType.id >= 0 && blockType.id < 8) { // Exclude water
+                        chestData[`${x}_${y}_${z}`].push({ type: blockType.name, count: 64, blockId: blockType.id });
+                    }
+                });
+            }
+        }
+        
+        function openChest(x, y, z) {
+            const key = `${x}_${y}_${z}`;
+            const items = chestData[key];
+            if(!items || items.length === 0) { showToast("Chest is Empty"); return; }
+            isChestOpen = true; openChestPos = {x, y, z};
+            document.exitPointerLock();
+            
+            document.getElementById('mobile-controls').style.display = 'none';
+            
+            const grid = document.getElementById('chest-items');
+            grid.innerHTML = '';
+            document.getElementById('chest-modal').style.display = 'block';
+            
+            items.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'chest-slot';
+                el.innerHTML = `<b>${item.type}</b><br>x${item.count}`;
+                el.onclick = () => lootItem(key, index, item);
+                grid.appendChild(el);
+            });
+        }
+
+
+        function closeChest() {
+            document.getElementById('chest-modal').style.display = 'none';
+            isChestOpen = false; openChestPos = null;
+            if(isMobile) document.getElementById('mobile-controls').style.display = 'block';
+            if(!isMobile && !isPaused) renderer.domElement.requestPointerLock();
+        }
+
+
+        function lootItem(key, index, item) {
+            let success = false;
+            if(item.type === 'Armor') {
+                if (player.armor > 0) showToast("Already have Armor!");
+                else { player.armor = 100; showToast("Equipped Armor!"); success = true; }
+            } else if(item.type === 'Sword') {
+                if(player.inventory.swords < 1) { player.inventory.swords++; showToast("Got Sword"); success = true; }
+                else showToast("Already have Sword!");
+            } else if(item.type === 'Arrows') {
+                if(player.inventory.arrows < 100) { player.inventory.arrows = Math.min(100, player.inventory.arrows + 10); showToast("Got Arrows (+10)"); success = true; chestData[key][index].count -= 9; }
+                else showToast("Full on Arrows!");
+            } else if(item.type === 'Shield') {
+                if(player.inventory.shields < 1) { player.inventory.shields = 1; player.shieldDurability = 100; showToast("Got Shield"); success = true; }
+                else showToast("Already have Shield");
+            } else if(item.type === 'Bow') {
+                if(player.inventory.bows < 1) { player.inventory.bows++; showToast("Got Bow"); success = true; }
+                else showToast("Already have Bow!");
+            } else if (item.blockId !== undefined) {
+                // Block item
+                const currentCount = player.blockInventory[item.blockId] || 0;
+                const maxStack = 64;
+                const toTake = Math.min(item.count, maxStack - currentCount);
+                
+                if (toTake > 0) {
+                    player.blockInventory[item.blockId] = currentCount + toTake;
+                    chestData[key][index].count -= toTake;
+                    showToast(`Got ${toTake}x ${item.type}`);
+                    success = true;
+                } else {
+                    showToast("Inventory full for this block!");
+                }
+            }
+
+
+            if(success) {
+                updateStatsUI(); updateEquipmentUI(); updateInventoryUI();
+                if(chestData[key][index].count <= 0) chestData[key].splice(index, 1);
+                if(chestData[key].length === 0) closeChest();
+                else openChest(...key.split('_').map(Number));
+            }
+        }
+
+
+        function initEngine() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
+            
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+
+            window.addEventListener('contextmenu', e => e.preventDefault());
+
+
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+            hemiLight.position.set(0, 20, 0); scene.add(hemiLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight.position.set(50, 80, 50); 
+            dirLight.castShadow = true;
+            dirLight.shadow.camera.left = -100;
+            dirLight.shadow.camera.right = 100;
+            dirLight.shadow.camera.top = 100;
+            dirLight.shadow.camera.bottom = -100;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            scene.add(dirLight);
+
+
+            floorTexture = createFloorTexture();
+            raycaster = new THREE.Raycaster();
+
+
+            // Initialize block textures
+            Object.keys(BLOCK_TYPES).forEach(key => {
+                const blockType = BLOCK_TYPES[key];
+                if (texturesEnabled) {
+                    blockType.texture = createBlockTexture(blockType);
+                }
+            });
+
+
+            const toolbar = document.getElementById('toolbar');
+            Object.keys(BLOCK_TYPES).forEach(key => {
+                const blockType = BLOCK_TYPES[key];
+                if (blockType.id >= 0 && blockType.id < 8) { // Exclude water from toolbar initially
+                    const btn = document.createElement('div');
+                    btn.className = 'block-btn';
+                    btn.textContent = blockType.name.substring(0, 3).toUpperCase();
+                    btn.style.backgroundColor = blockType.color;
+                    if (blockType.id === 0) btn.classList.add('active');
+                    btn.onclick = () => {
+                        document.querySelectorAll('.block-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedBlockType = blockType;
+                    };
+                    toolbar.appendChild(btn);
+                }
+            });
+
+
+            // Add water button in 3D mode
+            if (gameDimension === '3d') {
+                const waterBtn = document.createElement('div');
+                waterBtn.className = 'block-btn';
+                waterBtn.textContent = 'H2O';
+                waterBtn.style.backgroundColor = BLOCK_TYPES.WATER.color;
+                waterBtn.onclick = () => {
+                    document.querySelectorAll('.block-btn').forEach(b => b.classList.remove('active'));
+                    waterBtn.classList.add('active');
+                    selectedBlockType = BLOCK_TYPES.WATER;
+                };
+                toolbar.appendChild(waterBtn);
+            }
+
+
+            scene.add(camera);
+            const fpGeo = new THREE.BoxGeometry(0.2, 0.6, 0.2);
+            const fpMat = new THREE.MeshStandardMaterial({color: myColor});
+            fpArm = new THREE.Mesh(fpGeo, fpMat);
+            fpArm.position.set(0.4, -0.3, -0.6); fpArm.rotation.x = 0.5; camera.add(fpArm);
+
+
+            createWeaponMeshes();
+
+
+            renderer.domElement.addEventListener('click', (e) => {
+                resetIdleTimer();
+                if (e.target.classList.contains('equip-icon')) return;
+                if(!isMenuOpen && !isMobile && !isChestOpen && !isPaused) renderer.domElement.requestPointerLock();
+            });
+            document.addEventListener('pointerlockchange', () => { isLocked = document.pointerLockElement === renderer.domElement; });
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            window.addEventListener('touchstart', () => { 
+                resetIdleTimer(); 
+                if(!isMobile) switchToMobile(); 
+            });
+
+
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('mousemove', onMouseMove);
+            
+            document.getElementById('chat-input').addEventListener('keypress', (e) => {
+                resetIdleTimer();
+                lastChatActivity = Date.now();
+                if (e.key === 'Enter') sendChat();
+            });
+            document.getElementById('chat-input').addEventListener('keydown', (e) => e.stopPropagation());
+            document.getElementById('chat-input').addEventListener('focus', () => { lastChatActivity = Date.now(); });
+
+
+            const upsInput = document.getElementById('ups-input');
+            upsInput.addEventListener('change', (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val) || val < 10) val = 10;
+                if (val > 120) val = 120;
+                
+                e.target.value = val;
+                gameUPS = val;
+                
+                if (gameLoopInterval) {
+                    clearInterval(gameLoopInterval);
+                    gameLoopInterval = setInterval(gameTick, 1000 / gameUPS);
+                }
+            });
+
+
+            // Initialize block inventory for all block types
+            Object.keys(BLOCK_TYPES).forEach(key => {
+                const blockType = BLOCK_TYPES[key];
+                if (blockType.id >= 0 && blockType.id < 8) {
+                    player.blockInventory[blockType.id] = 0;
+                }
+            });
+
+
+            updateInventoryUI();
+        }
+
+
+        function createWeaponMeshes() {
+            const sGroup = new THREE.Group();
+            const blade = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.8, 0.05), 
+                new THREE.MeshStandardMaterial({color:0xcccccc, metalness: 0.8, roughness: 0.2})
+            );
+            blade.position.y = 0.5;
+            const hilt = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.05, 0.1), 
+                new THREE.MeshStandardMaterial({color:0xFFD700, metalness: 0.9, roughness: 0.1})
+            );
+            hilt.position.y = 0.1;
+            const handle = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.3, 0.05), 
+                new THREE.MeshStandardMaterial({color:0x8B4513})
+            );
+            handle.position.y = -0.1;
+            sGroup.add(blade, hilt, handle);
+            
+            const bGroup = new THREE.Group();
+            const wood = new THREE.Mesh(
+                new THREE.TorusGeometry(0.4, 0.05, 8, 20, Math.PI), 
+                new THREE.MeshStandardMaterial({color:0x8B4513})
+            );
+            wood.rotation.z = -Math.PI/2;
+            const string = new THREE.Mesh(
+                new THREE.BoxGeometry(0.02, 0.8, 0.02), 
+                new THREE.MeshStandardMaterial({color:0xffffff})
+            );
+            string.position.x = -0.2;
+            bGroup.add(wood, string);
+            
+            const shGroup = new THREE.Group();
+            const plate = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.6, 0.1), 
+                new THREE.MeshStandardMaterial({color:0x4169E1, metalness: 0.7, roughness: 0.3})
+            );
+            const border = new THREE.Mesh(
+                new THREE.BoxGeometry(0.55, 0.65, 0.08), 
+                new THREE.MeshStandardMaterial({color:0xffd700, metalness: 0.9, roughness: 0.1})
+            );
+            shGroup.add(border, plate);
+
+
+            const sClone = sGroup.clone(); sClone.position.set(-0.2, 0.5, -0.2); sClone.rotation.x = Math.PI/4; sClone.visible=false;
+            fpArm.add(sClone); fpWeapons.sword = sClone;
+            
+            const bClone = bGroup.clone(); bClone.position.set(-0.2, 0.4, 0); bClone.rotation.y = Math.PI/2; bClone.visible=false;
+            fpArm.add(bClone); fpWeapons.bow = bClone;
+            
+            const shClone = shGroup.clone(); shClone.position.set(-0.2, 0.2, -0.2); shClone.visible = false;
+            fpArm.add(shClone); fpWeapons.shield = shClone;
+            
+            scene.userData.weaponTemplates = { sword: sGroup, bow: bGroup, shield: shGroup };
+        }
+
+
+        function createCharacterRig(color) {
+            const rig = new THREE.Group();
+            const skinMat = new THREE.MeshStandardMaterial({color: 0xffcd05});
+            const pantsMat = new THREE.MeshStandardMaterial({color: 0x4a7c59});
+            const shirtMat = new THREE.MeshStandardMaterial({color: color});
+            const darkMat = new THREE.MeshStandardMaterial({color: 0x111111});
+
+
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), skinMat);
+            head.position.y = 0.7; rig.add(head);
+
+
+            const eyeGeo = new THREE.BoxGeometry(0.08, 0.08, 0.05);
+            const eyeL = new THREE.Mesh(eyeGeo, darkMat); eyeL.position.set(-0.1, 0.75, -0.21); rig.add(eyeL);
+            const eyeR = new THREE.Mesh(eyeGeo, darkMat); eyeR.position.set(0.1, 0.75, -0.21); rig.add(eyeR);
+
+
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), shirtMat);
+            torso.position.y = 0.1; rig.add(torso);
+
+
+            function makeLimb(x, y, mat) {
+                const g = new THREE.Group(); g.position.set(x, y, 0);
+                const m = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.8, 0.25), mat);
+                m.position.y = -0.35; g.add(m); return g;
+            }
+            
+            const lArm = makeLimb(-0.42, 0.45, skinMat);
+            const rArm = makeLimb(0.42, 0.45, skinMat);
+            const lLeg = makeLimb(-0.15, -0.3, pantsMat);
+            const rLeg = makeLimb(0.15, -0.3, pantsMat);
+            
+            const wSword = scene.userData.weaponTemplates.sword.clone();
+            wSword.position.set(0, -0.6, 0.2); wSword.rotation.x = -Math.PI/2; wSword.visible=false;
+            rArm.add(wSword);
+
+
+            const wShield = scene.userData.weaponTemplates.shield.clone();
+            wShield.position.set(0, -0.4, -0.2); wShield.visible=false;
+            lArm.add(wShield);
+
+
+            const wBow = scene.userData.weaponTemplates.bow.clone();
+            wBow.position.set(0, -0.6, 0); wBow.visible=false;
+            rArm.add(wBow);
+
+
+            rig.add(lArm, rArm, lLeg, rLeg);
+            
+            rig.userData = {
+                lArm: lArm, rArm: rArm, lLeg: lLeg, rLeg: rLeg, walkTime: 0,
+                weapons: { sword: wSword, bow: wBow, shield: wShield }
+            };
+            return rig;
+        }
+
+
+        function createNameLabel(text) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 64;
+            ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, 256, 64);
+            ctx.font = "bold 32px Arial"; ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(text, 128, 32);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+            sprite.scale.set(2, 0.5, 1); sprite.position.y = 1.3;
+            return sprite;
+        }
+
+
+        function startGame() {
+            scene.background = new THREE.Color(0x87CEEB);
+            document.body.style.background = 'linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%)';
+
+
+            playerMesh = createCharacterRig(myColor);
+            scene.add(playerMesh);
+            spawnChestAt(3, 1, 0);
+            respawnPlayer();
+            resetIdleTimer();
+            updateTerrainChunks();
+            
+            if (gameMode === 'offline' && offlineWorldData) {
+                applyOfflineWorldData(offlineWorldData);
+            }
+            
+            animate();
+            gameLoopInterval = setInterval(gameTick, 1000 / gameUPS);
+        }
+
+
+        function respawnPlayer() {
+            let safe = false;
+            let attempts = 0;
+            
+            while(!safe && attempts < 50) {
+                attempts++;
+                const rx = (Math.random() - 0.5) * 100;
+                const rz = (Math.random() - 0.5) * 100;
+                
+                let tooClose = false;
+                otherPlayers.forEach(p => {
+                    const dist = Math.sqrt((rx - p.mesh.position.x)**2 + (rz - p.mesh.position.z)**2);
+                    if(dist < 3) tooClose = true;
+                });
+                
+                if(!tooClose) {
+                    player.x = rx;
+                    player.z = rz;
+                    player.y = gameDimension === '3d' ? 10 : 25;
+                    safe = true;
+                }
+            }
+            
+            if (!safe) {
+                 player.x = (Math.random() - 0.5) * 200;
+                 player.z = (Math.random() - 0.5) * 200;
+                 player.y = gameDimension === '3d' ? 10 : 30;
+            }
+
+
+            player.vx = 0; player.vy = 0; player.vz = 0;
+            player.oxygen = player.maxOxygen;
+            lastKillerName = null;
+        }
+
+
+        function updateTerrainChunks() {
+            const requiredChunks = new Set();
+            const range = serverPenaltyActive ? 1 : viewDistSetting;
+
+
+            const addChunksAround = (pos, r) => {
+                const cx = Math.floor(pos.x / CHUNK_SIZE);
+                const cz = Math.floor(pos.z / CHUNK_SIZE);
+                for(let x = -r; x <= r; x++) {
+                    for(let z = -r; z <= r; z++) {
+                        requiredChunks.add(`${cx+x}_${cz+z}`);
+                    }
+                }
+            };
+
+
+            if(playerMesh) addChunksAround(player, range);
+            if(range >= 12) otherPlayers.forEach(p => addChunksAround(p.mesh.position, range));
+
+
+            requiredChunks.forEach(key => {
+                if(!activeChunks.has(key)) {
+                    const [cx, cz] = key.split('_').map(Number);
+                    const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE);
+                    const mat = new THREE.MeshStandardMaterial({ map: floorTexture });
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.rotation.x = -Math.PI / 2;
+                    mesh.position.set(cx * CHUNK_SIZE + CHUNK_SIZE/2, gameDimension === '3d' ? -1 : -0.5, cz * CHUNK_SIZE + CHUNK_SIZE/2);
+                    mesh.receiveShadow = true;
+                    scene.add(mesh);
+                    activeChunks.set(key, mesh);
+
+
+                    if(suspendedBlocks.has(key)) {
+                        suspendedBlocks.get(key).forEach(b => createBlock(b.x, b.y, b.z, b.type));
+                        suspendedBlocks.delete(key);
+                    }
+
+
+                    const rng = Math.sin(cx * 12.9898 + cz * 78.233) * 43758.5453;
+                    const val = rng - Math.floor(rng);
+                    if(val > 0.95) {
+                        const rX = (Math.sin(cx * 4.12 + cz * 5.55) * 10000) % 1;
+                        const rZ = (Math.sin(cx * 9.12 + cz * 2.22) * 10000) % 1;
+                        const bx = cx * CHUNK_SIZE + Math.floor(Math.abs(rX) * (CHUNK_SIZE - 2)) + 1;
+                        const bz = cz * CHUNK_SIZE + Math.floor(Math.abs(rZ) * (CHUNK_SIZE - 2)) + 1;
+                        spawnChestAt(bx, 1, bz);
+                    }
+                }
+            });
+
+
+            for(const [key, mesh] of activeChunks) {
+                if(!requiredChunks.has(key)) {
+                    scene.remove(mesh); mesh.geometry.dispose(); activeChunks.delete(key);
+
+
+                    const [cx, cz] = key.split('_').map(Number);
+                    const minX = cx * CHUNK_SIZE; const maxX = (cx + 1) * CHUNK_SIZE;
+                    const minZ = cz * CHUNK_SIZE; const maxZ = (cz + 1) * CHUNK_SIZE;
+                    
+                    const blocksToSuspend = [];
+                    for (const [bKey, bMesh] of worldBlocks) {
+                        const [bx, by, bz] = bKey.split('_').map(Number);
+                        if (bx >= minX && bx < maxX && bz >= minZ && bz < maxZ) {
+                            const blockType = bMesh.userData.blockType || 0;
+                            blocksToSuspend.push({ x: bx, y: by, z: bz, type: blockType });
+                            scene.remove(bMesh); bMesh.geometry.dispose();
+                            if (Array.isArray(bMesh.material)) {
+                                bMesh.material.forEach(m => m.dispose());
+                            } else {
+                                bMesh.material.dispose();
+                            }
+                            worldBlocks.delete(bKey);
+                        }
+                    }
+                    if(blocksToSuspend.length > 0) suspendedBlocks.set(key, blocksToSuspend);
+                }
+            }
+        }
+
+
+        function shootArrow() {
+            const arrow = new THREE.Group();
+            const shaft = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.05, 0.8), 
+                new THREE.MeshStandardMaterial({color:0x8B4513})
+            );
+            const feather = new THREE.Mesh(
+                new THREE.BoxGeometry(0.15, 0.02, 0.2), 
+                new THREE.MeshStandardMaterial({color:0xff0000})
+            );
+            feather.position.z = 0.4;
+            arrow.add(shaft, feather);
+            
+            arrow.position.set(player.x, player.y + 0.6, player.z);
+            const dir = new THREE.Vector3(-Math.sin(camYaw)*Math.cos(camPitch), Math.sin(camPitch), -Math.cos(camYaw)*Math.cos(camPitch));
+            arrow.position.add(dir.clone().multiplyScalar(0.5));
+            
+            arrow.lookAt(arrow.position.clone().add(dir));
+            arrow.userData = { velocity: dir.multiplyScalar(60), life: 3.0 };
+            
+            scene.add(arrow);
+            projectiles.push({ mesh: arrow });
+        }
+
+
+        function hostMobLogic(forceSpawn = false, spawnCount = null) {
+            if (gameMode === 'offline') return;
+            
+            const now = Date.now();
+            if((now > nextMobSpawn && !mobsSpawned) || (forceSpawn && !mobsSpawned)) {
+                 const diffMap = { easy: 5, normal: 10, hard: 20, extreme: 40 };
+                 const count = spawnCount || diffMap[mobDifficulty] || 10;
+                 const newMobs = [];
+                 
+                 activeChunks.forEach((_, key) => {
+                     const [cx, cz] = key.split('_').map(Number);
+                     for(let i=0; i<count; i++) {
+                         const mx = cx * CHUNK_SIZE + Math.random() * CHUNK_SIZE;
+                         const mz = cz * CHUNK_SIZE + Math.random() * CHUNK_SIZE;
+                         const r = Math.random();
+                         let type = 'zombie';
+                         if(r < 0.3) type = 'skeleton';
+                         if(r < 0.1) type = 'creeper';
+                         
+                         newMobs.push({ id: Math.random().toString(36), type, x: mx, y: 1, z: mz, hp: 100, yaw: 0 });
+                     }
+                 });
+                 
+                 newMobs.forEach(m => serverMobs.set(m.id, m));
+                 broadcast({ type: 'mob_update', mobs: newMobs });
+                 mobsSpawned = true;
+                 mobDespawnTime = now + MOB_DESPAWN_DELAY;
+                 broadcast({ type: 'chat', msg: "⚔️ MOBS HAVE SPAWNED! ⚔️" }, null, true);
+            }
+            
+            const timeLeft = nextMobSpawn - now;
+            if(timeLeft < 300000 && timeLeft > 298000) broadcast({ type: 'chat', msg: "⚠️ Mobs spawn in 5 minutes!" }, null, true);
+            if(timeLeft < 60000 && timeLeft > 58000) broadcast({ type: 'chat', msg: "⚠️ Mobs spawn in 1 minute!" }, null, true);
+            
+            if(mobsSpawned && now > mobDespawnTime) {
+                serverMobs.clear();
+                broadcast({ type: 'chat', msg: "✅ Mobs despawned." }, null, true);
+                mobsSpawned = false;
+                nextMobSpawn = now + MOB_SPAWN_INTERVAL;
+            }
+
+
+            if(mobsSpawned) {
+                const updates = [];
+                serverMobs.forEach(m => {
+                    let minDist = 999;
+                    let target = null;
+                    const dHost = Math.sqrt((player.x-m.x)**2 + (player.z-m.z)**2);
+                    if(dHost < minDist) { minDist = dHost; target = player; }
+                    
+                    otherPlayers.forEach(p => {
+                        const dp = Math.sqrt((p.target.x-m.x)**2 + (p.target.z-m.z)**2);
+                        if(dp < minDist) { minDist = dp; target = p.target; }
+                    });
+
+
+                    if(target && minDist < 60) {
+                        const dx = target.x - m.x; const dz = target.z - m.z;
+                        const angle = Math.atan2(dx, dz);
+                        m.yaw = angle;
+                        m.x += Math.sin(angle) * 0.08;
+                        m.z += Math.cos(angle) * 0.08;
+                    }
+                    updates.push(m);
+                });
+                if(updates.length > 0) broadcast({ type: 'mob_update', mobs: updates });
+            }
+        }
+
+
+        function gameTick() {
+            const now = Date.now();
+            if (now - lastInteractionTime > IDLE_TIMEOUT && gameMode === 'online') { 
+                kickPlayer("KICKED FOR IDLE"); 
+                return; 
+            }
+            
+            if (chatEnabled) {
+                const chatEl = document.getElementById('chat-container');
+                const timeSinceChat = now - lastChatActivity;
+                if (timeSinceChat > 3000 && !document.activeElement.isSameNode(document.getElementById('chat-input'))) {
+                    chatEl.classList.add('faded');
+                } else {
+                    chatEl.classList.remove('faded');
+                }
+            }
+
+
+            if(isHost && gameMode === 'online') hostMobLogic();
+            if(serverPenaltyActive) checkPenaltyStatus();
+
+
+            const dt = 1.0 / gameUPS;
+            updatePhysics(dt);
+            
+            const netInterval = 1000 / gameUPS;
+            
+            if(gameMode === 'online' && now - lastNetworkUpdate > netInterval && myPeerId) {
+                lastNetworkUpdate = now;
+                sendPacket({
+                    type: 'move', id: myPeerId, x: player.x, y: player.y, z: player.z,
+                    color: myColor, name: myName, attacking: player.attackAnimTimer > 0, yaw: camYaw,
+                    weapon: player.equippedWeapon, blocking: player.isBlocking, hp: player.health
+                });
+            }
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            camera.updateMatrixWorld();
+
+
+            if(player.inventory.shields <= 0) player.isBlocking = false;
+
+
+            if(playerMesh) {
+                playerMesh.position.set(player.x, player.y, player.z);
+                playerMesh.rotation.y = camYaw;
+                const moveSpeed = Math.sqrt(player.vx**2 + player.vz**2);
+                animateRig(playerMesh, moveSpeed, player.attackAnimTimer);
+                updateCharacterWeapons(playerMesh, player.equippedWeapon, player.isBlocking);
+            }
+
+
+            const isFirstPerson = (viewMode === 0 || (player.isAiming && player.equippedWeapon === 'bow'));
+            if(fpArm) {
+                fpArm.visible = isFirstPerson && !isStudioMode;
+                if(fpWeapons.sword && player.attackAnimTimer > 0) {
+                    fpWeapons.sword.rotation.x = Math.PI/4 - (Math.sin(player.attackAnimTimer * Math.PI) * 1.5);
+                } else if (fpWeapons.sword) {
+                    fpWeapons.sword.rotation.x = Math.PI/4;
+                }
+            }
+            if(playerMesh) playerMesh.visible = !isFirstPerson && !isStudioMode;
+
+
+            if(attackCooldown > 0) attackCooldown--;
+            if(player.attackAnimTimer > 0) player.attackAnimTimer -= 0.04;
+
+
+            chunkUpdateTimer++;
+            if(chunkUpdateTimer > 30) { updateTerrainChunks(); chunkUpdateTimer = 0; }
+
+
+            if(isChestOpen && openChestPos) {
+                const dist = Math.sqrt((player.x - openChestPos.x)**2 + (player.y - openChestPos.y)**2 + (player.z - openChestPos.z)**2);
+                if(dist > 3.5) closeChest();
+            }
+
+
+            const shieldActive = (keys.ctrl || (isMobile && keys.shieldBtn)) && player.inventory.shields > 0;
+            if(shieldActive !== player.isBlocking) {
+                player.isBlocking = shieldActive; updateShieldVisuals();
+            }
+            
+            // Water overlay
+            if (player.inWater && gameDimension === '3d') {
+                document.getElementById('water-overlay').style.opacity = '1';
+            } else {
+                document.getElementById('water-overlay').style.opacity = '0';
+            }
+            
+            otherPlayers.forEach(p => {
+                p.mesh.position.lerp(p.target, 0.2);
+                p.mesh.rotation.y = p.yaw;
+                
+                const dist = playerMesh ? playerMesh.position.distanceTo(p.mesh.position) : 999;
+                const maxView = (serverPenaltyActive ? 1 : viewDistSetting) * CHUNK_SIZE + 20;
+                p.mesh.visible = dist < maxView;
+                
+                const speed = p.mesh.position.distanceTo(p.target) > 0.1 ? 1 : 0;
+                if(p.attackAnim > 0) p.attackAnim -= 0.04;
+                animateRig(p.mesh, speed, p.attackAnim);
+
+
+                updateIndicator(p.indicator, p.mesh.position);
+            });
+            mobs.forEach(m => updateIndicator(m.indicator, m.mesh.position));
+
+
+            renderer.render(scene, camera);
+        }
+        
+        function updateIndicator(el, pos3d) {
+            if(!el) return;
+            const pPos = pos3d.clone(); pPos.y += 1.8;
+            
+            const dist3D = pos3d.distanceTo(camera.position);
+            const distSpan = el.querySelector('.dist-text');
+            if (distSpan) distSpan.innerText = `[${Math.round(dist3D)}m]`;
+
+
+            const screenPos = pPos.clone().project(camera);
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            
+            const x = (screenPos.x * 0.5 + 0.5) * w;
+            const y = -(screenPos.y * 0.5 - 0.5) * h;
+            
+           const dx = x - (w/2);
+            const dy = y - (h/2);
+            const pixelDist = Math.sqrt(dx*dx + dy*dy);
+
+
+            const dirToP = pos3d.clone().sub(camera.position);
+            const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir);
+            const isBehind = dirToP.dot(camDir) < 0;
+
+
+            if (player.isAiming && pixelDist < 100 && !isBehind) {
+                el.style.display = 'none';
+                return;
+            }
+
+
+            const closeRange = 75;
+            
+            if (!isBehind && x > 0 && x < w && y > 0 && y < h && dist3D < closeRange) {
+                 el.style.display = 'none';
+            } else if (dist3D >= closeRange) {
+                 el.style.display = 'block';
+                 
+                 let cx = x; let cy = y;
+                 if (isBehind) {
+                     cx = w - x;
+                     cy = h - y;
+                 }
+                 
+                 const padding = 40;
+                 const clampedX = Math.max(padding, Math.min(w - padding, cx));
+                 const clampedY = Math.max(padding, Math.min(h - padding, cy));
+                 
+                 el.style.left = clampedX + 'px';
+                 el.style.top = clampedY + 'px';
+            } else {
+                 el.style.display = 'none';
+            }
+        }
+
+
+        function animateRig(rig, speed, attackProgress) {
+            if(!rig.userData) return;
+            
+            rig.userData.lArm.rotation.x = 0; rig.userData.rArm.rotation.x = 0;
+            rig.userData.lArm.rotation.y = 0; rig.userData.rArm.rotation.y = 0;
+            rig.userData.lArm.rotation.z = 0; rig.userData.rArm.rotation.z = 0;
+
+
+            const isBlocking = rig.userData.weapons.shield.visible;
+            if (isBlocking) {
+                rig.userData.lArm.rotation.x = 0;
+                rig.userData.lArm.rotation.y = 0;
+            }
+
+
+            if(attackProgress > 0) {
+                const punch = Math.sin(attackProgress * Math.PI);
+                rig.userData.rArm.rotation.x = punch * 2.0;
+                if(!isBlocking) rig.userData.lArm.rotation.x = 0;
+            }
+            
+            if(speed > 0.1) {
+                rig.userData.walkTime += 0.2;
+                const a = Math.sin(rig.userData.walkTime) * 0.8;
+                if(attackProgress <= 0) {
+                   if(!isBlocking) rig.userData.lArm.rotation.x = a;
+                   rig.userData.rArm.rotation.x = -a;
+                }
+                rig.userData.lLeg.rotation.x = -a; rig.userData.rLeg.rotation.x = a;
+            } else if (attackProgress <= 0) {
+                if(!isBlocking) rig.userData.lArm.rotation.x = 0;
+                rig.userData.rArm.rotation.x = 0;
+                rig.userData.lLeg.rotation.x = 0; rig.userData.rLeg.rotation.x = 0;
+            }
+        }
+
+
+        function updatePhysics(dt) {
+            // Health regeneration
+            if (player.health < player.maxHealth && !isStudioMode) {
+                if (Date.now() - lastHitTime >= HEALTH_REGEN_DELAY_MS) {
+                    const oldHealth = player.health;
+                    player.health = Math.min(player.maxHealth, player.health + HEALTH_REGEN_RATE_PER_SEC * dt);
+                    if (Math.floor(player.health) !== Math.floor(oldHealth)) updateStatsUI();
+                }
+            }
+
+
+            // Check if player is in water (3D mode only)
+            if (gameDimension === '3d') {
+                const headY = Math.round(player.y + 0.6);
+                const waterKey = `${Math.round(player.x)}_${headY}_${Math.round(player.z)}`;
+                const blockAtHead = worldBlocks.get(waterKey);
+                
+                if (blockAtHead && blockAtHead.userData.blockType === BLOCK_TYPES.WATER.id) {
+                    if (!player.inWater) {
+                        player.inWater = true;
+                        showToast("Entered Water");
+                    }
+                    
+                    // Oxygen depletion
+                    player.oxygen -= 10 * dt;
+                    if (player.oxygen <= 0) {
+                        player.oxygen = 0;
+                        takeDamage('drown', 'The Ocean');
+                    }
+                    updateStatsUI();
+                } else {
+                    if (player.inWater) {
+                        player.inWater = false;
+                        showToast("Exited Water");
+                    }
+                    // Restore oxygen
+                    if (player.oxygen < player.maxOxygen) {
+                        player.oxygen = Math.min(player.maxOxygen, player.oxygen + 20 * dt);
+                        updateStatsUI();
+                    }
+                }
+            }
+            
+            const fwd = new THREE.Vector3(-Math.sin(camYaw), 0, -Math.cos(camYaw));
+            const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
+            
+            let speed = isStudioMode ? 20 : (keys.shift ? player.runSpeed : player.speed);
+            if (player.inWater && !isStudioMode) speed *= 0.5; // Slower movement in water
+            
+            let jumpForce = keys.shift ? 18 : 15;
+            if (player.inWater && !isStudioMode) jumpForce *= 0.7; // Less jump in water
+            
+            let dx = 0, dz = 0;
+            if(keys.w) { dx += fwd.x; dz += fwd.z; } if(keys.s) { dx -= fwd.x; dz -= fwd.z; }
+            if(keys.a) { dx -= right.x; dz -= right.z; } if(keys.d) { dx += right.x; dz += right.z; }
+            if(dx!==0 || dz!==0) { const len = Math.sqrt(dx*dx + dz*dz); dx/=len; dz/=len; }
+            
+            player.vx = dx * speed; player.vz = dz * speed;
+            
+            if(isStudioMode) {
+                if(keys.space) player.vy = speed; else if(keys.shift) player.vy = -speed; else player.vy = 0;
+            } else {
+                // Gravity adjustment for water
+                const gravityForce = player.inWater ? 20 : 40;
+                player.vy -= gravityForce * dt;
+                
+                // Swimming mechanic in water
+                if(player.inWater && keys.space) {
+                    player.vy = 8; // Swim up
+                }
+                
+                if(keys.space && player.onGround) { player.vy = jumpForce; player.onGround = false; }
+            }
+            
+            let nx = player.x + player.vx * dt;
+            let collisionX = !isStudioMode && (checkCollision(nx, player.y, player.z) || checkPlayerCollision(nx, player.z));
+            if(collisionX) { player.vx = 0; nx = player.x; } player.x = nx;
+
+
+            let nz = player.z + player.vz * dt;
+            let collisionZ = !isStudioMode && (checkCollision(player.x, player.y, nz) || checkPlayerCollision(player.x, nz));
+            if(collisionZ) { player.vz = 0; nz = player.z; } player.z = nz;
+            
+            let ny = player.y + player.vy * dt; player.onGround = false;
+
+
+            if(!isStudioMode) {
+                const groundLevel = gameDimension === '3d' ? -0.1 : 0.9;
+                const onPlatform = true;
+                if(onPlatform && ny < groundLevel && player.vy <= 0) { ny = groundLevel; player.vy = 0; player.onGround = true; }
+                
+                if (player.vy < 0) {
+                    const feetY = ny - 0.9; const blockYBelow = Math.floor(feetY + 0.001);
+                    const blockKey = `${Math.round(player.x)}_${blockYBelow}_${Math.round(player.z)}`;
+                    const blockBelow = worldBlocks.get(blockKey);
+                    
+                    if (blockBelow) {
+                        const blockType = blockBelow.userData.blockType;
+                        // Can't stand on water
+                        if (blockType !== BLOCK_TYPES.WATER.id) {
+                            const targetY = blockYBelow + 0.5 + 0.9;
+                            if (ny <= targetY + 0.01) { ny = targetY; player.vy = 0; player.onGround = true; }
+                        }
+                    }
+                } else if (player.vy > 0) {
+                    const headY = ny + 0.9; const blockYAbove = Math.ceil(headY - 0.001);
+                    const blockKey = `${Math.round(player.x)}_${blockYAbove}_${Math.round(player.z)}`;
+                    const blockAbove = worldBlocks.get(blockKey);
+                    
+                    if (blockAbove) {
+                        const blockType = blockAbove.userData.blockType;
+                        if (blockType !== BLOCK_TYPES.WATER.id) {
+                            ny = blockYAbove - 0.5 - 0.9; player.vy = -1;
+                        }
+                    }
+                }
+            }
+            
+            if(ny < -50) takeDamage('void', 'The Void');
+            player.y = ny;
+
+
+            const moveSpeed = Math.sqrt(player.vx**2 + player.vz**2);
+            let bobOffset = 0;
+            if(player.onGround && moveSpeed > 1 && !isStudioMode) {
+                player.walkTime += moveSpeed * 0.015;
+                if(viewMode === 0 || player.isAiming) bobOffset = Math.sin(player.walkTime * 1.5) * 0.1;
+            }
+
+
+            const targetFov = (keys.shift && moveSpeed > 5 && !isStudioMode) ? 85 : 70;
+            camera.fov += (targetFov - camera.fov) * 0.1;
+            camera.updateProjectionMatrix();
+
+
+            if(isStudioMode || viewMode === 0 || player.isAiming) {
+                camera.position.set(player.x, player.y + 0.6 + bobOffset, player.z);
+                camera.lookAt(player.x - Math.sin(camYaw)*Math.cos(camPitch), player.y + 0.6 + bobOffset + Math.sin(camPitch), player.z - Math.cos(camYaw)*Math.cos(camPitch));
+            } else {
+                const dist = 6; const actualYaw = camYaw + (viewMode === 2 ? Math.PI : 0);
+                camera.position.set(player.x + dist * Math.sin(actualYaw), player.y + 2 + dist * -Math.sin(camPitch), player.z + dist * Math.cos(actualYaw));
+                camera.lookAt(player.x, player.y + 1, player.z);
+            }
+
+
+            for(let i=projectiles.length-1; i>=0; i--) {
+                const p = projectiles[i];
+                const u = p.mesh.userData;
+                p.mesh.position.add(u.velocity.clone().multiplyScalar(dt));
+                u.velocity.y -= 9.8 * dt * 0.5;
+                const nextPos = p.mesh.position.clone().add(u.velocity.clone().multiplyScalar(0.1));
+                p.mesh.lookAt(nextPos);
+                if(p.mesh.position.y < 0) { scene.remove(p.mesh); projectiles.splice(i, 1); continue; }
+                u.life -= dt;
+                if(u.life <= 0) { scene.remove(p.mesh); projectiles.splice(i, 1); }
+            }
+        }
+
+
+        function checkCollision(x, y, z) {
+            const ix = Math.round(x), iz = Math.round(z);
+            const feetY = Math.round(y - 0.8 - 0.05), midY = Math.round(y), headY = Math.round(y + 0.8);
+            
+            const checkBlock = (key) => {
+                const block = worldBlocks.get(key);
+                if (!block) return false;
+                const blockType = block.userData.blockType;
+                // Water is not solid collision
+                return blockType !== BLOCK_TYPES.WATER.id;
+            };
+            
+            if(checkBlock(`${ix}_${feetY}_${iz}`)) return true;
+            if(checkBlock(`${ix}_${midY}_${iz}`)) return true;
+            if(checkBlock(`${ix}_${headY}_${iz}`)) return true;
+            return false;
+        }
+
+
+        function checkPlayerCollision(x, z) {
+            if (gameMode === 'offline') return false;
+            
+            const playerRadius = 0.5;
+            for (let [id, p] of otherPlayers) {
+                const dx = x - p.mesh.position.x, dz = z - p.mesh.position.z;
+                if (Math.sqrt(dx*dx + dz*dz) < playerRadius * 2) return true;
+            }
+            return false;
+        }
+
+
+        function createBlock(x, y, z, blockTypeId) {
+            const key = `${x}_${y}_${z}`;
+            if(worldBlocks.has(key)) return;
+            
+            let blockType;
+            if (blockTypeId === -1) {
+                // Special chest block
+                blockType = { id: -1, color: CHEST_COLOR, transparent: false };
+            } else {
+                blockType = BLOCK_ID_TO_TYPE[blockTypeId] || BLOCK_TYPES.STONE;
+            }
+            
+            const geo = new THREE.BoxGeometry(1,1,1);
+            let mat;
+            
+            if (blockType.id === -1) {
+                // Chest
+                mat = new THREE.MeshStandardMaterial({color: blockType.color});
+            } else if (texturesEnabled && blockType.texture) {
+                if (blockType.transparent) {
+                    mat = new THREE.MeshStandardMaterial({ 
+                        map: blockType.texture, 
+                        transparent: true, 
+                        opacity: 0.7,
+                        side: THREE.DoubleSide
+                    });
+                } else {
+                    mat = new THREE.MeshStandardMaterial({ map: blockType.texture });
+                }
+            } else {
+                if (blockType.transparent) {
+                    mat = new THREE.MeshStandardMaterial({ 
+                        color: blockType.color, 
+                        transparent: true, 
+                        opacity: 0.7,
+                        side: THREE.DoubleSide
+                    });
+                } else {
+                    mat = new THREE.MeshStandardMaterial({ color: blockType.color });
+                }
+            }
+            
+            const m = new THREE.Mesh(geo, mat);
+            m.position.set(x,y,z); 
+            m.castShadow = true;
+            m.receiveShadow = true;
+            m.userData.blockType = blockType.id;
+            scene.add(m); 
+            worldBlocks.set(key, m);
+        }
+        
+        function removeBlock(key) {
+            if(worldBlocks.has(key)) {
+                const m = worldBlocks.get(key);
+                scene.remove(m); m.geometry.dispose();
+                if (Array.isArray(m.material)) {
+                    m.material.forEach(mat => mat.dispose());
+                } else {
+                    m.material.dispose();
+                }
+                worldBlocks.delete(key);
+            }
+        }
+
+
+        function performAction(isRightClick) {
+            const maxReach = isStudioMode ? 30 : 15;
+            
+            if(!isRightClick) {
+                if (player.equippedWeapon !== 'bow') {
+                    const wpn = (player.equippedWeapon === 'sword') ? 'sword' : 'hand';
+                    const cooldown = COOLDOWNS[wpn];
+                    
+                    if (Date.now() - lastAttackTime < cooldown) return;
+                    lastAttackTime = Date.now();
+                    
+                    player.attackAnimTimer = 1.0;
+                    
+                    const playerPos = new THREE.Vector3(player.x, player.y + 0.6, player.z);
+                    const playerForward = new THREE.Vector3(-Math.sin(camYaw), 0, -Math.cos(camYaw));
+                    
+                    for(let [id, p] of otherPlayers) {
+                        const dist = playerPos.distanceTo(p.mesh.position);
+                        if(dist < 4) {
+                            const dirToEnemy = new THREE.Vector3().subVectors(p.mesh.position, playerPos).normalize();
+                            if(dirToEnemy.dot(playerForward) > 0.8) {
+                                if(pvpAllowed && gameMode === 'online') {
+                                    sendPacket({ type: 'attack', targetId: id, weapon: wpn, attackerName: myName });
+                                    showToast(`You hit ${p.name} with: ${wpn}`);
+                                } else if (gameMode === 'online') { 
+                                    showToast("PvP Disabled"); 
+                                }
+                                return;
+                            }
+                        }
+                    }
+                    
+                    mobs.forEach(m => {
+                        const dist = playerPos.distanceTo(m.mesh.position);
+                        if(dist < 4) showToast(`You hit Mob with: ${wpn}`);
+                    });
+                }
+            }
+
+
+            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+            const intersects = raycaster.intersectObjects(scene.children);
+            
+            if(intersects.length > 0) {
+                const hit = intersects[0];
+                if(hit.distance > maxReach) return;
+
+
+                const bx = Math.round(hit.object.position.x);
+                const by = Math.round(hit.object.position.y);
+                const bz = Math.round(hit.object.position.z);
+                const key = `${bx}_${by}_${bz}`;
+                
+                if(isRightClick && chestData[key]) { openChest(bx, by, bz); return; }
+
+
+                const p = hit.point.add(hit.face.normal.multiplyScalar(0.5));
+                const x=Math.round(p.x), y=Math.round(p.y), z=Math.round(p.z);
+                
+                if(isRightClick) {
+                    // Place block
+                    if (!isStudioMode) {
+                        // Check inventory
+                        const currentCount = player.blockInventory[selectedBlockType.id] || 0;
+                        if (currentCount <= 0) {
+                            showToast(`No ${selectedBlockType.name} in inventory!`);
+                            return;
+                        }
+                        player.blockInventory[selectedBlockType.id]--;
+                        updateInventoryUI();
+                    }
+                    
+                    if(y>=0) {
+                        createBlock(x,y,z, selectedBlockType.id);
+                        sendPacket({type:'block', action:1, x,y,z, type: selectedBlockType.id});
+                    }
+                } else {
+                    // Break block
+                     if(chestData[`${bx}_${by}_${bz}`] && chestData[`${bx}_${by}_${bz}`].length > 0) { 
+                         showToast("Chest not empty!"); 
+                         return; 
+                     }
+                     
+                     const block = worldBlocks.get(key);
+                     if (block) {
+                         const blockType = block.userData.blockType;
+                         
+                         // Return block to inventory (unless it's a chest or in 2D mode)
+                         if (blockType >= 0 && gameDimension === '3d' && !isStudioMode) {
+                             const currentCount = player.blockInventory[blockType] || 0;
+                             player.blockInventory[blockType] = currentCount + 1;
+                             updateInventoryUI();
+                         }
+                         
+                         if(hit.object.position.y !== -0.5 && hit.object.position.y !== -1) {
+                            removeBlock(`${bx}_${by}_${bz}`);
+                            sendPacket({type:'block', action:0, x:bx, y:by, z:bz});
+                         }
+                     }
+                }
+            }
+        }
+
+
+        function onMouseDown(e) {
+            resetIdleTimer();
+            if(isMenuOpen || isMobile || isChestOpen || isPaused) return;
+            if(e.target.classList.contains('equip-icon')) return;
+
+
+            if (e.button === 0) {
+                if(!isStudioMode && pvpAllowed && player.equippedWeapon === 'bow' && player.inventory.arrows > 0 && gameMode === 'online') {
+                    if(Date.now() - lastAttackTime > COOLDOWNS.bow) player.isAiming = true;
+                    return;
+                }
+                performAction(false);
+            } else if (e.button === 2) {
+                performAction(true);
+            }
+        }
+
+
+        function onMouseUp(e) {
+            if(e.button === 0 && player.isAiming) {
+                player.isAiming = false;
+                lastAttackTime = Date.now();
+                if(player.inventory.arrows > 0) {
+                    player.inventory.arrows--;
+                    updateEquipmentUI();
+                    player.attackAnimTimer = 1.0;
+                    shootArrow();
+                    showToast("Fired!");
+                    
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+
+
+                    for(let [id, p] of otherPlayers) {
+                        const screenPos = p.mesh.position.clone().project(camera);
+                        const pixelX = screenPos.x * (w/2);
+                        const pixelY = screenPos.y * (h/2);
+                        const pixelDist = Math.sqrt(pixelX*pixelX + pixelY*pixelY);
+                        
+                        const dirToP = p.mesh.position.clone().sub(camera.position).normalize();
+                        const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir);
+                        const isFront = dirToP.dot(camDir) > 0;
+                        
+                        const dist3D = playerMesh.position.distanceTo(p.mesh.position);
+                        const allowedError = Math.min(150, 2500 / dist3D);
+
+
+                        if (isFront && pixelDist < allowedError && p.mesh.visible) {
+                            const directHit = pixelDist < 8;
+                            
+                            if (directHit) {
+                                sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
+                                showToast("🎯 Direct Hit!");
+                                break;
+                            } else {
+                                if (Math.random() < 0.30) {
+                                    sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
+                                    showToast("Lucky shot!");
+                                    break;
+                                } else {
+                                    showToast("Close miss");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        function sendChat() {
+            resetIdleTimer();
+            lastChatActivity = Date.now();
+            const i = document.getElementById('chat-input');
+            const msg = i.value.trim();
+            if(!msg) return;
+            i.value = '';
+            
+            if (msg.toLowerCase().startsWith('/change username to ')) {
+                const newName = msg.substring(20).trim();
+                if(newName.length > 0 && newName.length <= 12) {
+                    const oldName = myName;
+                    myName = newName;
+                    document.getElementById('username').value = newName;
+                    addChatBubble("SYSTEM", `Username changed from ${oldName} to ${myName}`, true);
+                    return;
+                } else {
+                    addChatBubble("SYSTEM", "Invalid name. Max 12 chars.", true);
+                    return;
+                }
+            }
+
+
+            if(msg.startsWith('/')) {
+                if (msg.toLowerCase() === '/chat off') {
+                    toggleChatVisibility(false);
+                    document.getElementById('chk-show-chat').checked = false;
+                    addChatBubble("SYSTEM", "Chat disabled. Enable in menu.", true);
+                    return;
+                }
+                
+                if (msg.toLowerCase() === '/give' && isHost) {
+                    player.inventory.swords = 1;
+                    player.inventory.bows = 1;
+                    player.inventory.arrows = 100;
+                    player.inventory.shields = 1;
+                    player.armor = 100;
+                    player.shieldDurability = 100;
+                    
+                    // Give blocks in 3D mode
+                    if (gameDimension === '3d') {
+                        Object.keys(BLOCK_TYPES).forEach(key => {
+                            const blockType = BLOCK_TYPES[key];
+                            if (blockType.id >= 0 && blockType.id < 8) {
+                                player.blockInventory[blockType.id] = 64;
+                            }
+                        });
+                    }
+                    
+                    updateEquipmentUI();
+                    updateStatsUI();
+                    updateInventoryUI();
+                    addChatBubble("SYSTEM", "✨ Full inventory given!", true);
+                    return;
+                }
+
+
+                if(isHost) {
+                    processHostCommand(msg);
+                } else if (gameMode === 'online') {
+                    addChatBubble("SYSTEM", "Commands are for Host only.", true);
+                }
+            } else {
+                addChatBubble(myName, msg);
+                sendPacket({ type: 'chat', name: myName, msg: msg });
+            }
+            
+            document.getElementById('chat-input').blur();
+            if(!isMobile && !isPaused) renderer.domElement.requestPointerLock();
+        }
+        
+        function processHostCommand(cmd) {
+            const parts = cmd.split(' ');
+            const c = parts[0].toLowerCase();
+            
+            if (c === '/cmd' && parts[1] === 'help') {
+                addChatBubble("SYSTEM", "--- HOST COMMANDS ---", true);
+                addChatBubble("SYSTEM", "/give : Give yourself full inventory", true);
+                addChatBubble("SYSTEM", "/spawn mobs <count> : Spawn enemies", true);
+                addChatBubble("SYSTEM", "/destroy mobs : Clear all enemies", true);
+                addChatBubble("SYSTEM", "/destroy <player> : Smite a player", true);
+                addChatBubble("SYSTEM", "/tp all : Teleport everyone to you", true);
+                addChatBubble("SYSTEM", "/tp <p1> to <p2> : Teleport player 1 to player 2", true);
+                addChatBubble("SYSTEM", "/kick <player> : Kick a player", true);
+                addChatBubble("SYSTEM", "/mute <player> : Mute specific player", true);
+                addChatBubble("SYSTEM", "/unmute <player> : Unmute specific player", true);
+                return;
+            }
+
+
+            if (c === '/spawn' && parts[1] === 'mobs') {
+                const count = parseInt(parts[2]);
+                if (isNaN(count)) {
+                    addChatBubble("SYSTEM", "Usage: /spawn mobs <count>", true);
+                    return;
+                }
+                
+                if (count > 120) {
+                    showToast("Trying to break the game?");
+                    setTimeout(() => showToast("The game will break you!"), 2000);
+                    broadcast({ type: 'chat', msg: "⚠️ Host being punished by server", name: 'SYSTEM' }, null, true);
+                    
+                    let deaths = 0;
+                    const punishInterval = setInterval(() => {
+                        takeDamage('admin', 'Server Justice');
+                        deaths++;
+                        if(deaths >= 20) clearInterval(punishInterval);
+                    }, 300);
+                    return;
+                }
+                
+                hostMobLogic(true, count);
+                return;
+            }
+            
+            if (c === '/destroy') {
+                if (parts[1] === 'mobs') {
+                    serverMobs.clear();
+                    broadcast({ type: 'mob_clear' });
+                    addChatBubble("SYSTEM", "All mobs destroyed.", true);
+                    return;
+                }
+                const target = parts[1];
+                clientConnections.forEach(conn => {
+                    const p = otherPlayers.get(conn.peer);
+                    if(p && p.name === target) {
+                        conn.send({ type: 'attack', targetId: conn.peer, weapon: 'admin', attackerName: 'HOST' });
+                        addChatBubble("SYSTEM", `⚔️ Destroyed ${target}`, true);
+                    }
+                });
+                return;
+            }
+            
+            if (c === '/tp') {
+                if (parts[1] === 'all') {
+                    const px = player.x; const pz = player.z;
+                    clientConnections.forEach(conn => {
+                        const angle = Math.random() * Math.PI * 2;
+                        conn.send({ type: 'teleport', x: px + Math.cos(angle)*5, y: player.y + 2, z: pz + Math.sin(angle)*5 });
+                    });
+                    addChatBubble("SYSTEM", "Teleported all to Host", true);
+                } else if (parts[2] === 'to') {
+                    const p1Name = parts[1];
+                    const p2Name = parts[3];
+                    let conn1 = null, p2Pos = null;
+                    clientConnections.forEach(conn => {
+                        const p = otherPlayers.get(conn.peer);
+                        if(p && p.name === p1Name) conn1 = conn;
+                        if(p && p.name === p2Name) p2Pos = p.mesh.position;
+                    });
+                    if(p2Name === myName) p2Pos = player;
+                    if(conn1 && p2Pos) {
+                        conn1.send({ type: 'teleport', x: p2Pos.x + 5, y: p2Pos.y + 2, z: p2Pos.z });
+                        addChatBubble("SYSTEM", `Teleported ${p1Name} to ${p2Name}`, true);
+                    } else {
+                        addChatBubble("SYSTEM", "Player not found", true);
+                    }
+                }
+                return;
+            }
+            
+            if (c === '/kick') {
+                const target = parts[1];
+                let found = false;
+                clientConnections.forEach(conn => {
+                    const p = otherPlayers.get(conn.peer);
+                    if(p && p.name === target) { 
+                        conn.send({ type: 'kick', reason: 'You have been kicked' });
+                        setTimeout(() => conn.close(), 100);
+                        found = true; 
+                    }
+                });
+                if(found) addChatBubble("SYSTEM", `Kicked ${target}`, true);
+                else addChatBubble("SYSTEM", "Player not found", true);
+                return;
+            }
+            
+            if (c === '/mute' || c === '/unmute') {
+                 const target = parts[1];
+                 if (target === 'server') {
+                     isServerMuted = (c === '/mute');
+                     broadcast({ type: 'chat', msg: isServerMuted ? "Server chat muted." : "Server chat unmuted.", name: 'SYSTEM' });
+                 } else if (target) {
+                     if (c === '/mute') mutedPlayers.add(target); else mutedPlayers.delete(target);
+                     broadcast({ type: 'chat', msg: `${target} has been ${c === '/mute' ? 'muted' : 'unmuted'}.`, name: 'SYSTEM' });
+                 }
+                 return;
+            }
+
+
+            addChatBubble("SYSTEM", "Unknown command. Type /cmd help", true);
+        }
+
+
+        function addChatBubble(name, msg, isSystem = false) {
+            lastChatActivity = Date.now();
+            const d = document.createElement('div');
+            d.className = isSystem ? 'chat-msg chat-system' : 'chat-msg';
+            d.innerHTML = isSystem ? msg : `<span class="chat-name">${name}:</span> ${msg}`;
+            const c = document.getElementById('chat-messages');
+            c.appendChild(d); c.scrollTop = c.scrollHeight;
+        }
+
+
+        function toggleMenu() {
+            resetIdleTimer();
+            lastChatActivity = Date.now();
+            if(isMenuOpen && !gameStarted) return;
+
+
+            isMenuOpen = !isMenuOpen;
+            if(isMenuOpen) {
+                document.getElementById('menu-overlay').classList.remove('hidden');
+                if(!isMobile) document.exitPointerLock();
+                if(isHost && myPeerId) {
+                    document.getElementById('host-section').style.display = 'block';
+                    document.getElementById('main-menu-btns').style.display = 'none';
+                    document.getElementById('btn-close-server').style.display = 'block';
+                    document.getElementById('btn-start-playing').style.display = 'none';
+                    document.getElementById('btn-back-host').style.display = 'none';
+                    updateHostPlayerList();
+                }
+                else if (myPeerId && !isHost && gameMode === 'online') {
+                    document.getElementById('main-menu-btns').style.display = 'block';
+                    document.getElementById('btn-leave-game').style.display = 'block';
+                }
+                else resetMenu();
+            } else {
+                document.getElementById('menu-overlay').classList.add('hidden');
+                if(!isMobile && !isPaused) renderer.domElement.requestPointerLock();
+            }
+        }
+
+
+        function copyHostId() {
+            if(!myPeerId) return;
+            const t = document.createElement("textarea");
+            t.value = myPeerId; t.style.position = "fixed"; t.style.left = "-9999px";
+            document.body.appendChild(t); t.select();
+            try { document.execCommand('copy'); showToast("ID Copied!"); } catch(e){}
+            document.body.removeChild(t);
+        }
+        
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 2000);
+        }
+
+
+        function toggleStudioMode(forceState) {
+            if(forceState !== undefined) isStudioMode = forceState;
+            else {
+                if(!studioAllowed && !isStudioMode && gameMode === 'online') { showToast("Studio Mode is Disabled by Host"); return; }
+                isStudioMode = !isStudioMode;
+            }
+            document.getElementById('toolbar').classList.toggle('visible', isStudioMode);
+            const badge = document.getElementById('mode-badge');
+            
+            if (isStudioMode) {
+                badge.innerText = "STUDIO MODE";
+                badge.classList.add('mode-studio');
+            } else {
+                if (gameMode === 'offline') {
+                    badge.innerText = 'OFFLINE MODE';
+                    badge.classList.remove('mode-studio');
+                    badge.classList.add('mode-offline');
+                } else {
+                    badge.innerText = "PLAY MODE";
+                    badge.classList.remove('mode-studio');
+                }
+            }
+            
+            if (gameDimension === '3d' && !isStudioMode) {
+                badge.innerText += ' (3D)';
+            }
+        }
+
+
+        function toggleChatVisibility(forceState) {
+            const chk = document.getElementById('chk-show-chat');
+            const val = forceState !== undefined ? forceState : chk.checked;
+            chatEnabled = val;
+            chk.checked = val;
+            
+            const chatEl = document.getElementById('chat-container');
+            if (chatEnabled) {
+                chatEl.style.display = 'flex';
+                chatEl.classList.remove('faded');
+                lastChatActivity = Date.now();
+            } else {
+                chatEl.style.display = 'none';
+            }
+        }
+
+
+        function switchToMobile() {
+            if(isMobile) return;
+            isMobile = true;
+            document.getElementById('mobile-controls').style.display = 'block';
+            document.querySelector('.controls-hint').style.display = 'none';
+            document.getElementById('joystick-checkbox').style.display = 'flex';
+            setupTouch();
+            updateStatsUI();
+        }
+
+
+        function switchToDesktop() {
+            if(!isMobile) return;
+            isMobile = false;
+            document.getElementById('mobile-controls').style.display = 'none';
+            document.querySelector('.controls-hint').style.display = 'inline';
+            document.getElementById('joystick-checkbox').style.display = 'none';
+            updateStatsUI();
+        }
+        
+        function setupTouch() {
+            if(touchControlsSetup) return;
+            touchControlsSetup = true;
+            
+            const zoneMove = document.getElementById('zone-move');
+            const stick = document.querySelector('.joystick-stick');
+            const base = document.getElementById('joystick-visual');
+            let moveStartX=0, moveStartY=0;
+            let moveTouchId = null;
+            
+            zoneMove.addEventListener('touchstart', e => {
+                resetIdleTimer(); e.preventDefault();
+                const touch = e.changedTouches[0];
+                moveTouchId = touch.identifier;
+                moveStartX = touch.clientX; moveStartY = touch.clientY;
+                if (showJoystick) {
+                    base.style.display = 'block'; 
+                    base.style.left = moveStartX+'px'; 
+                    base.style.top = moveStartY+'px';
+                }
+                stick.style.transform = `translate(-50%, -50%)`;
+            });
+
+
+            zoneMove.addEventListener('touchmove', e => {
+                e.preventDefault();
+                let touch = null;
+                for(let i=0; i<e.changedTouches.length; i++) {
+                    if(e.changedTouches[i].identifier === moveTouchId) { touch = e.changedTouches[i]; break; }
+                }
+                if(!touch) return;
+                const maxDist = 40;
+                let dx = touch.clientX - moveStartX; let dy = touch.clientY - moveStartY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist > maxDist) { const ratio = maxDist / dist; dx *= ratio; dy *= ratio; }
+                if (showJoystick) {
+                    stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                }
+                keys.w = dy < -10; keys.s = dy > 10; keys.a = dx < -10; keys.d = dx > 10;
+            });
+
+
+            const endMove = (e) => {
+                for(let i=0; i<e.changedTouches.length; i++) {
+                    if(e.changedTouches[i].identifier === moveTouchId) {
+                        if (showJoystick) base.style.display = 'none';
+                        keys.w=keys.s=keys.a=keys.d=false; moveTouchId = null; break;
+                    }
+                }
+            };
+            zoneMove.addEventListener('touchend', endMove); zoneMove.addEventListener('touchcancel', endMove);
+
+
+            const zoneLook = document.getElementById('zone-look');
+            let lookLastX = 0; let lookLastY = 0; let lookTouchId = null;
+
+
+            zoneLook.addEventListener('touchstart', e => {
+                resetIdleTimer(); e.preventDefault();
+                const touch = e.changedTouches[0];
+                lookTouchId = touch.identifier;
+                lookLastX = touch.clientX; lookLastY = touch.clientY;
+            });
+
+
+            zoneLook.addEventListener('touchmove', e => {
+                e.preventDefault();
+                let touch = null;
+                for(let i=0; i<e.changedTouches.length; i++) {
+                    if(e.changedTouches[i].identifier === lookTouchId) { touch = e.changedTouches[i]; break; }
+                }
+                if(!touch) return;
+                const dx = touch.clientX - lookLastX; const dy = touch.clientY - lookLastY;
+                camYaw -= dx * 0.008;
+                camPitch -= dy * 0.008;
+                camPitch = Math.max(-1.5, Math.min(1.5, camPitch));
+                lookLastX = touch.clientX; lookLastY = touch.clientY;
+            });
+
+
+            const endLook = (e) => {
+                for(let i=0; i<e.changedTouches.length; i++) {
+                    if(e.changedTouches[i].identifier === lookTouchId) { lookTouchId = null; break; }
+                }
+            };
+            zoneLook.addEventListener('touchend', endLook);
+            
+            const btnJump = document.getElementById('btn-jump');
+            btnJump.addEventListener('touchstart', e => { resetIdleTimer(); e.preventDefault(); keys.space = true; });
+            btnJump.addEventListener('touchend', e => { e.preventDefault(); keys.space = false; });
+            
+            const btnShift = document.getElementById('btn-shift');
+            btnShift.addEventListener('touchstart', e => {
+                resetIdleTimer(); e.preventDefault(); keys.shift = !keys.shift;
+                if(keys.shift) btnShift.classList.add('active'); else btnShift.classList.remove('active');
+            });
+            
+            document.getElementById('btn-action-break').addEventListener('touchstart', e => {
+                resetIdleTimer(); e.preventDefault();
+                if(!isStudioMode && pvpAllowed && player.equippedWeapon === 'bow' && player.inventory.arrows > 0 && gameMode === 'online') {
+                     if(Date.now() - lastAttackTime > COOLDOWNS.bow) player.isAiming = true;
+                } else { performAction(false); }
+            });
+            document.getElementById('btn-action-break').addEventListener('touchend', e => {
+                if(player.isAiming) {
+                    player.isAiming = false;
+                    lastAttackTime = Date.now();
+                    if(player.inventory.arrows > 0) {
+                        player.inventory.arrows--; updateEquipmentUI(); player.attackAnimTimer = 1.0;
+                        shootArrow();
+                        
+                        const w = window.innerWidth;
+                        const h = window.innerHeight;
+
+
+                        for(let [id, p] of otherPlayers) {
+                            const screenPos = p.mesh.position.clone().project(camera);
+                            const pixelX = screenPos.x * (w/2);
+                            const pixelY = screenPos.y * (h/2);
+                            const pixelDist = Math.sqrt(pixelX*pixelX + pixelY*pixelY);
+                            
+                            const dirToP = p.mesh.position.clone().sub(camera.position).normalize();
+                            const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir);
+                            const isFront = dirToP.dot(camDir) > 0;
+                            
+                            const dist3D = playerMesh.position.distanceTo(p.mesh.position);
+                            const allowedError = Math.min(150, 2500 / dist3D);
+
+
+                            if (isFront && pixelDist < allowedError && p.mesh.visible) {
+                                const directHit = pixelDist < 8;
+                                
+                                if (directHit) {
+                                    sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
+                                    showToast("🎯 Direct Hit!");
+                                    break;
+                                } else {
+                                    if (Math.random() < 0.30) {
+                                        sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
+                                        showToast("Lucky shot!");
+                                        break;
+                                    } else {
+                                        showToast("Close miss");
+                                    }
+                                }
+                            }
+                        }
+                        showToast("Fired!");
+                    }
+                }
+            });
+
+
+            document.getElementById('btn-action-place').addEventListener('touchstart', e => { resetIdleTimer(); e.preventDefault(); performAction(true); });
+            document.getElementById('btn-studio-toggle').addEventListener('touchstart', e => { resetIdleTimer(); e.preventDefault(); toggleStudioMode(); });
+            
+            const btnShield = document.getElementById('btn-shield');
+            btnShield.addEventListener('touchstart', e => {
+                resetIdleTimer();
+                e.preventDefault();
+                if(player.inventory.shields <= 0) {
+                    showToast("No Shield equipped!");
+                    return;
+                }
+                keys.shieldBtn = true;
+            });
+            btnShield.addEventListener('touchend', e => { e.preventDefault(); keys.shieldBtn = false; });
+        }
+        
+        function onKeyDown(e) {
+            resetIdleTimer();
+            if (!e.key) return;
+            
+            const active = document.activeElement;
+            const isTyping = active === document.getElementById('chat-input') || 
+                             active === document.getElementById('username') || 
+                             active === document.getElementById('remote-id');
+            
+            if (isTyping) { if(e.key === 'Escape') active.blur(); return; }
+
+
+            if(isMobile) switchToDesktop();
+            
+            // Changed from Escape to backslash
+            if(e.key === '\\') { 
+                e.preventDefault();
+                if (isPaused) closePauseMenu();
+                else if (!isMenuOpen) openPauseMenu();
+                else toggleMenu();
+            }
+            if(e.key === '/') { e.preventDefault(); document.getElementById('chat-input').focus(); }
+            
+            const k = e.key.toLowerCase();
+            if(keys.hasOwnProperty(k)) keys[k] = true;
+            if(e.key === ' ') keys.space = true;
+            if(e.key === 'Shift') keys.shift = true;
+            if(e.key === 'Control') keys.ctrl = true;
+            
+            if(k === 'tab') { e.preventDefault(); toggleStudioMode(); }
+        }
+        
+        function onKeyUp(e) {
+            if (!e.key) return;
+            const k = e.key.toLowerCase();
+            if(keys.hasOwnProperty(k)) keys[k] = false;
+            if(e.key === ' ') keys.space = false;
+            if(e.key === 'Shift') keys.shift = false;
+            if(e.key === 'Control') keys.ctrl = false;
+        }
+        
+        function onMouseMove(e) {
+            resetIdleTimer();
+            if(isLocked && !isMenuOpen && !isChestOpen && !isPaused) {
+                camYaw -= e.movementX * CAM_SENSITIVITY;
+                camPitch -= e.movementY * CAM_SENSITIVITY;
+                camPitch = Math.max(-1.5, Math.min(1.5, camPitch));
+            }
+        }
+
+
+        initEngine();
+    </script>
+</body>
+</html>
+
+
+©Midkid808 2026
