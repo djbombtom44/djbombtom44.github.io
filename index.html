@@ -3381,7 +3381,7 @@ function connectToServer(id, locked) {
                     updateEquipmentUI();
                     player.attackAnimTimer = 1.0;
                     shootArrow();
-                    showToast("What are you shooting at?");
+                    showToast("Fired!");
                     
                     const w = window.innerWidth;
                     const h = window.innerHeight;
@@ -3409,10 +3409,10 @@ function connectToServer(id, locked) {
                             } else {
                                 if (Math.random() < 0.30) {
                                     sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                    showToast(“Yeah, Aimbot got ur back");
+                                    showToast("Lucky shot!");
                                     break;
                                 } else {
-                                    showToast("No Aimbot 4 u 😂");
+                                    showToast("Close miss");
                                 }
                             }
                         }
@@ -3856,15 +3856,15 @@ function connectToServer(id, locked) {
                                 } else {
                                     if (Math.random() < 0.30) {
                                         sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                        showToast("Yeah, Aimbot got ur back");
+                                        showToast("Lucky shot!");
                                         break;
                                     } else {
-                                        showToast("No Aimbot 4 u 😂");
+                                        showToast("Close miss");
                                     }
                                 }
                             }
                         }
-                        showToast("What are you shooting at?");
+                        showToast("Fired!");
                     }
                 }
             });
