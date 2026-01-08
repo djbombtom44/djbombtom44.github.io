@@ -3381,7 +3381,7 @@ function connectToServer(id, locked) {
                     updateEquipmentUI();
                     player.attackAnimTimer = 1.0;
                     shootArrow();
-                    showToast("Fired!");
+                    showToast("What are you aiming at?!");
                     
                     const w = window.innerWidth;
                     const h = window.innerHeight;
@@ -3409,10 +3409,10 @@ function connectToServer(id, locked) {
                             } else {
                                 if (Math.random() < 0.30) {
                                     sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                    showToast("Lucky shot!");
+                                    showToast("Yeah, Aimbot got ur back");
                                     break;
                                 } else {
-                                    showToast("Close miss");
+                                    showToast("No Aimbot 4 u 😂");
                                 }
                             }
                         }
@@ -3856,15 +3856,15 @@ function connectToServer(id, locked) {
                                 } else {
                                     if (Math.random() < 0.30) {
                                         sendPacket({ type: 'attack', targetId: id, weapon: 'arrow', attackerName: myName });
-                                        showToast("Lucky shot!");
+                                        showToast("Yeah, Aimbot got ur back");
                                         break;
                                     } else {
-                                        showToast("Close miss");
+                                        showToast("No Aimbot 4 u 😂");
                                     }
                                 }
                             }
                         }
-                        showToast("Fired!");
+                        showToast("What are you aiming at?!");
                     }
                 }
             });
