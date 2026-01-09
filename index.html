@@ -665,7 +665,7 @@
                     <option value="1">Low (3x3)</option>
                     <option value="2" selected>Normal (5x5)</option>
                     <option value="5">High (11x11)</option>
-                    <option value="12">Use at your own risk (25x25)</option>
+                    <option value="12">Extreme (25x25)</option>
                 </select>
             </div>
 
@@ -1489,16 +1489,19 @@ function connectToServer(id, locked) {
             
             if (isHost) {
                 addPauseButton('Player List', showPlayerList);
+                addPauseButton('View Distance', updateViewDistance):
                 addPauseButton('Command Help', showHostCommands);
                 addPauseButton('Options', showHostOptions);
                 addPauseButton('Close Menu', closePauseMenu);
                 addPauseButton('Close Server', closeServer);
             } else if (gameMode === 'online') {
+                addPauseButton('View Distance', updateViewDistance):
                 addPauseButton('Command Help', showClientCommands);
                 addPauseButton('Options', showClientOptions);
                 addPauseButton('Leave Server', leaveGame);
                 addPauseButton('Close Menu', closePauseMenu);
             } else {
+                addPauseButton('View Distance', updateViewDistance):
                 addPauseButton('Save and Exit', saveAndExit);
                 addPauseButton('Options', showOfflineOptions);
                 addPauseButton('Close Menu', closePauseMenu);
@@ -1984,7 +1987,7 @@ function connectToServer(id, locked) {
             const hurt = document.getElementById('hurt-overlay');
             hurt.style.opacity = 1;
             setTimeout(() => hurt.style.opacity = 0, 200);
-            showToast(`Hit by ${weaponType || 'hand'}! -${dmg} HP`);
+            showToast(`YOWCH, You got hit! || -${dmg} HP`);
             
             if(player.health <= 0) {
                 player.health = player.maxHealth;
@@ -3279,7 +3282,7 @@ function connectToServer(id, locked) {
                             if(dirToEnemy.dot(playerForward) > 0.8) {
                                 if(pvpAllowed && gameMode === 'online') {
                                     sendPacket({ type: 'attack', targetId: id, weapon: wpn, attackerName: myName });
-                                    showToast(`You hit ${p.name} with: ${wpn}`);
+                                    showToast(`You hit ${p.name}!`);
                                 } else if (gameMode === 'online') { 
                                     showToast("PvP Disabled"); 
                                 }
