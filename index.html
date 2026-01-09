@@ -1297,7 +1297,7 @@ function connectToServer(id, locked) {
             viewDistSetting = parseInt(sel.value);
             if (viewDistSetting >= 12) {
                 maxModeStartTime = Date.now();
-                showToast("Warning: MAX mode active");
+                showToast("Warning: Extreme mode active");
             } else {
                 maxModeStartTime = 0;
             }
@@ -1490,16 +1490,19 @@ function connectToServer(id, locked) {
             if (isHost) {
                 addPauseButton('Player List', showPlayerList);
                 addPauseButton('Command Help', showHostCommands);
+                addPauseButton('Vision Distance', updateViewDistance);
                 addPauseButton('Options', showHostOptions);
                 addPauseButton('Close Menu', closePauseMenu);
                 addPauseButton('Close Server', closeServer);
             } else if (gameMode === 'online') {
+                addPauseButton('Vision Distance', updateViewDistance);
                 addPauseButton('Command Help', showClientCommands);
                 addPauseButton('Options', showClientOptions);
                 addPauseButton('Leave Server', leaveGame);
                 addPauseButton('Close Menu', closePauseMenu);
             } else {
                 addPauseButton('Save and Exit', saveAndExit);
+                addPauseButton('Vision Distance', updateViewDistance);
                 addPauseButton('Options', showOfflineOptions);
                 addPauseButton('Close Menu', closePauseMenu);
             }
@@ -3279,7 +3282,7 @@ function connectToServer(id, locked) {
                             if(dirToEnemy.dot(playerForward) > 0.8) {
                                 if(pvpAllowed && gameMode === 'online') {
                                     sendPacket({ type: 'attack', targetId: id, weapon: wpn, attackerName: myName });
-                                    showToast(`You hit ${p.name} with: ${wpn}`);
+                                    showToast(`You hit ${p.name} !`);
                                 } else if (gameMode === 'online') { 
                                     showToast("PvP Disabled"); 
                                 }
